@@ -1,7 +1,7 @@
 ## AI-01: Kiểm tra chuẩn hóa và quan hệ sơ đồ ERD (erd-v1)
 
 - **Ngày thực hiện:** 09/11/2026
-- **Người thực hiện:** Nguyễn Minh Khang
+- **Người thực hiện:** Nguyễn Minh Khang (TV4 - Phụ trách CSDL & Backend)
 - **Công cụ AI sử dụng:** Gemini
 - **Tác vụ liên quan:** `[DB] ERD` — Rà soát thiết kế cơ sở dữ liệu bản phác (`erd-v1.png`)
 
@@ -56,9 +56,6 @@
   # AI-03: Khởi tạo Database Migration & Seeder cho hệ thống Book Store
 
 - **Ngày thực hiện:** 11/11/2026
-- **Nhánh làm việc:** `feature/database` (Pull Request vào `BackEnd`)
-- **Công cụ AI sử dụng:** Gemini
-
 ---
 
 ## 1. Mục tiêu công việc
@@ -99,3 +96,53 @@ AI đã hỗ trợ sinh mã nguồn và cấu trúc hoàn chỉnh cho 7 tệp tr
 ## 5. Đánh giá hiệu quả
 - **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung migration và dữ liệu mẫu phong phú, giúp rút ngắn thời gian nhập liệu thủ công).
 - **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát từng cột dữ liệu, kiểm thử thực tế trên MySQL/phpMyAdmin và đối chiếu chuẩn xác với các thành viên trong nhóm trước khi nộp Pull Request.
+# AI-04: Xây dựng chức năng Quản lý danh mục sản phẩm (TM-11)
+
+- **Ngày thực hiện:** 12/11/2026
+- **Thẻ Trello:** TM-11 (Quản lý danh mục)
+- **Nhánh làm việc:** `feature/TM-11-quan-ly-danh-muc` (Pull Request vào `BackEnd`)
+
+---
+
+## 1. Mục tiêu công việc
+- Xây dựng trọn bộ chức năng CRUD (Xem danh sách, Thêm mới, Chỉnh sửa, Xóa) cho danh mục sản phẩm trên trang quản trị Admin.
+- Đảm bảo đầy đủ các tiêu chí chấp nhận trên Trello: tự động tạo `slug` chuẩn hóa từ tên danh mục, kiểm tra dữ liệu đầu vào (bắt buộc nhập, chống trùng tên danh mục) và **chặn xóa danh mục nếu đang chứa sản phẩm**.
+- Thiết kế bộ giao diện quản trị trực quan bằng Bootstrap 5 và viết kịch bản kiểm thử tự động (`CategoryManagementTest`) để xác minh toàn bộ luồng nghiệp vụ.
+
+---
+
+## 2. Tóm tắt các Prompt đã sử dụng
+1. **Khởi tạo Model & Controller xử lý nghiệp vụ TM-11:** *"Viết mã nguồn Eloquent Model `Category`, `Product` với quan hệ `hasMany`/`belongsTo` và `Admin\CategoryController` đầy đủ CRUD, tự động sinh `slug` bằng `Str::slug()`, validate trùng tên tiếng Việt và chặn xóa nếu danh mục đang có sản phẩm."*
+2. **Đăng ký Route & Xây dựng giao diện Blade:** *"Khai báo `Route::resource` cho trang quản trị danh mục và viết 3 tệp giao diện Blade (`index.blade.php`, `create.blade.php`, `edit.blade.php`) sử dụng Bootstrap 5 hiển thị số lượng sách trong từng danh mục và thông báo lỗi/thành công."*
+3. **Viết kiểm thử tự động (Feature Test):** *"Viết `CategoryManagementTest` kiểm thử tự động cả 2 kịch bản: thêm/sửa/xóa danh mục rỗng thành công và hệ thống từ chối xóa danh mục đang có sách trực thuộc."*
+
+---
+
+## 3. Kết quả từ AI
+AI đã hỗ trợ sinh khung mã nguồn cho 8 tệp thuộc tính năng Quản lý danh mục:
+- **Models:**
+  - `app/Models/Category.php`
+  - `app/Models/Product.php`
+- **Controller & Routes:**
+  - `app/Http/Controllers/Admin/CategoryController.php`
+  - `routes/web.php`
+- **Giao diện (Blade Views):**
+  - `resources/views/admin/categories/index.blade.php`
+  - `resources/views/admin/categories/create.blade.php`
+  - `resources/views/admin/categories/edit.blade.php`
+- **Kiểm thử (Feature Test):**
+  - `tests/Feature/CategoryManagementTest.php`
+
+---
+
+## 4. Kiểm tra, chỉnh sửa & xác minh thực tế của thành viên
+- **Chuẩn hóa mã nguồn Route:** Rà soát và sắp xếp lại vị trí khai báo `use App\Http\Controllers\Admin\CategoryController;` lên đầu tệp `routes/web.php` theo đúng chuẩn PSR-12 của Laravel[cite: 6].
+- **Kiểm thử giao diện trực tiếp trên trình duyệt:** Tạo đúng cấu trúc thư mục `resources/views/admin/categories/`[cite: 8], chạy máy chủ `php artisan serve` và kiểm tra trực tiếp tại đường dẫn `http://127.0.0.1:8000/admin/categories` với bộ dữ liệu mẫu của `book_store_db`.
+- **Chạy kiểm thử tự động PHPUnit:** Thực thi lệnh `php artisan test --filter CategoryManagementTest` và đạt kết quả **PASS 2/2 test cases** (`admin can crud empty category` và `cannot delete category that contains products`)[cite: 10].
+- **Khôi phục dữ liệu mẫu sau kiểm thử:** Do trait `RefreshDatabase` làm sạch dữ liệu khi chạy test, thành viên đã chạy lại `php artisan migrate:fresh --seed` để nạp lại đầy đủ 5 danh mục, 30 đầu sách, 11 tài khoản và 10 đơn hàng mẫu trước khi đẩy code.
+
+---
+
+## 5. Đánh giá hiệu quả
+- **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung Controller, giao diện Bootstrap 5 và các ca kiểm thử PHPUnit, giúp rút ngắn đáng kể thời gian lập trình lặp lại).
+- **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát chuẩn hóa, tổ chức đúng cấu trúc thư mục dự án, chạy kiểm thử thực tế trên cả trình duyệt lẫn PHPUnit và khôi phục nguyên vẹn cơ sở dữ liệu mẫu trước khi tạo Pull Request.
