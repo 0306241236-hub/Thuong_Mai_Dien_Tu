@@ -27,3 +27,75 @@
   2. Bổ sung các cột nghiệp vụ cần thiết cho giao diện và quy trình đặt hàng gồm: `role`, `phone`, `address` (bảng `users`); `shipping_address` (bảng `orders`); `image_url`, `description` (bảng `products`).
 - **Điểm AI gợi ý sai / dư thừa so với phạm vi đồ án (bác bỏ):**
   - AI đề xuất tách thêm bảng `carts` (quản lý phiên giỏ hàng) cùng các bảng phụ cho thanh toán và đơn vị vận chuyển. Đề xuất này **dư thừa** vì phạm vi đồ án giới hạn cứng trong **6 bảng**, đồng thời mỗi người dùng chỉ sở hữu một giỏ hàng duy nhất nên việc nối khóa ngoại `user_id` trực tiếp vào `cart_items` như thiết kế hiện tại đã tối ưu và gọn nhẹ hơn.
+  ## AI-02: Kiểm tra chuẩn 3NF (erd-v2) và tạo tài liệu đặc tả bảng (mo-ta-bang.md)
+
+- **Ngày thực hiện:** 10/11/2026 
+- **Tác vụ liên quan:** `[DB] ERD` — Hoàn thiện sơ đồ chuẩn 3NF (`erd-v2.png`) và viết đặc tả chi tiết 6 bảng (`docs/database/mo-ta-bang.md`)
+
+### 1. Câu lệnh (Prompt) đã sử dụng
+> "Tôi đã cập nhật sơ đồ ERD lên phiên bản v2 với 6 bảng và các cột bổ sung sau:
+> 1. `users (id, name, email [UNIQUE], password, phone, address, role)`
+> 2. `categories (id, name, description)`
+> 3. `products (id, category_id, name, price, stock, image_url, description)`
+> 4. `cart_items (id, user_id, product_id, quantity)` — có ràng buộc `UNIQUE(user_id, product_id)`
+> 5. `orders (id, user_id, total_price, status, shipping_address, created_at)`
+> 6. `order_items (id, order_id, product_id, quantity, price_at_purchase)`
+>
+> Hãy kiểm tra lại xem thiết kế này đã đạt chuẩn 3NF hoàn toàn chưa, đồng thời xuất giúp tôi bảng đặc tả chi tiết (tên cột, kiểu dữ liệu, ràng buộc PK/FK/NOT NULL, mô tả) định dạng Markdown để lưu vào file `mo-ta-bang.md`."
+
+### 2. Tóm tắt phản hồi của AI
+- **Đánh giá chuẩn hóa (1NF, 2NF, 3NF):** AI xác nhận toàn bộ 6 bảng đã đạt chuẩn **3NF** (mỗi cột chỉ chứa giá trị đơn, không có phụ thuộc bộ phận hay phụ thuộc bắc cầu giữa các thuộc tính không khóa; địa chỉ giao hàng `shipping_address` lưu ở `orders` là hợp lý về mặt nghiệp vụ để giữ nguyên lịch sử đơn hàng khi khách đổi địa chỉ ở `users`).
+- **Đề xuất đặc tả bảng (`mo-ta-bang.md`):** AI xuất ra 6 bảng đặc tả Markdown đầy đủ kiểu dữ liệu, khóa chính (`PK`), khóa ngoại (`FK`), giá trị mặc định (`DEFAULT`), đồng thời gợi ý đổi toàn bộ khóa chính `id` sang kiểu `UUID` và dùng kiểu `ENUM` cho cột `status` và `role`.
+
+### 3. Đánh giá và hướng xử lý (Kiểm chứng của thành viên)
+- **Ý kiến hữu ích được tiếp thu (đã đưa vào `erd-v2.png` và `mo-ta-bang.md`):**
+  1. Giữ nguyên cột `shipping_address` độc lập trong bảng `orders` thay vì lấy động từ `users.address`, đảm bảo tính toàn vẹn lịch sử giao hàng khi người dùng cập nhật hồ sơ cá nhân.
+  2. Tận dụng khung bảng Markdown của AI để trình bày rõ ràng các ràng buộc (`NOT NULL`, `UNIQUE`, `DEFAULT 0` cho `stock`, `DEFAULT 'pending'` cho `orders.status`) và quy tắc khóa ngoại (`ON DELETE RESTRICT` với `order_items` để tránh mất dữ liệu hóa đơn khi xóa sản phẩm), giúp TV2 (Backend) dễ dàng ánh xạ sang code.
+- **Điểm AI gợi ý dư thừa / chưa phù hợp thực tế (đã chỉnh sửa lại):**
+  - AI đề xuất chuyển toàn bộ khóa chính `id` từ `INT` sang `UUID` (`CHAR(36)`) và dùng kiểu `ENUM` cứng trong CSDL cho `orders.status`. Nhóm đã thống nhất **không áp dụng** vì `INT` tự tăng (`AUTO_INCREMENT`) gọn nhẹ, dễ truy vấn và đủ đáp ứng quy mô đồ án 6 bảng; đồng thời dùng `VARCHAR` cho `status` giúp TV2 linh hoạt thêm/sửa trạng thái đơn hàng ở tầng code mà không phải chạy lệnh sửa cấu trúc bảng CSDL.
+  # AI-03: Khởi tạo Database Migration & Seeder cho hệ thống Book Store
+
+- **Ngày thực hiện:** 11/11/2026
+- **Nhánh làm việc:** `feature/database` (Pull Request vào `BackEnd`)
+- **Công cụ AI sử dụng:** Gemini
+
+---
+
+## 1. Mục tiêu công việc
+- Cài đặt môi trường Laravel từ khung dự án của nhóm và kết nối với cơ sở dữ liệu MySQL (`book_store_db`) trên XAMPP.
+- Xây dựng 6 tệp Laravel Migration chuẩn hóa theo thiết kế ERD v2 (`users`, `categories`, `products`, `cart_items`, `orders`, `order_items`) đảm bảo đúng kiểu dữ liệu, khóa ngoại và đánh chỉ mục (index).
+- Viết `DatabaseSeeder` khởi tạo dữ liệu mẫu phục vụ kiểm thử toàn bộ luồng nghiệp vụ cho Backend và Frontend.
+
+---
+
+## 2. Tóm tắt các Prompt đã sử dụng
+1. **Cấu hình môi trường & kết nối CSDL:** *"Hướng dẫn cấu hình tệp `.env`, sinh khóa ứng dụng Laravel và kết nối với cơ sở dữ liệu MySQL trên XAMPP."*
+2. **Tạo mã nguồn 6 bảng Migration theo ERD v2:** *"Viết mã nguồn 6 tệp Laravel Migration cho hệ thống bán sách gồm: `users`, `categories`, `products`, `cart_items`, `orders`, `order_items` với kiểu tiền tệ `DECIMAL(12,2)`, ràng buộc khóa ngoại `onDelete('cascade')` và các index tối ưu truy vấn."*
+3. **Viết Seeder dữ liệu mẫu tiếng Việt:** *"Viết `DatabaseSeeder.php` sử dụng Query Builder (`DB::table`) để nạp 5 danh mục, 30 đầu sách (bao gồm sách hết hàng `stock = 0`), 11 tài khoản (1 Admin, 10 Customer có 1 tài khoản `locked`) và 10 đơn hàng chia đều 4 trạng thái."*
+4. **Quy trình kiểm thử & bàn giao Git:** *"Kiểm tra thứ tự chạy migration, xuất tệp `book_store_db.sql` trên phpMyAdmin và hướng dẫn tạo Pull Request từ `feature/database` vào nhánh `BackEnd`."*
+
+---
+
+## 3. Kết quả từ AI
+AI đã hỗ trợ sinh mã nguồn và cấu trúc hoàn chỉnh cho 7 tệp trong thư mục `database/`:
+- `database/migrations/2014_10_12_000000_create_users_table.php`
+- `database/migrations/2026_11_18_161127_create_categories_table.php`
+- `database/migrations/2026_11_18_161140_create_products_table.php`
+- `database/migrations/2026_11_18_161150_create_cart_items_table.php`
+- `database/migrations/2026_11_18_161322_create_orders_table.php`
+- `database/migrations/2026_11_18_161330_create_order_items_table.php`
+- `database/seeders/DatabaseSeeder.php`
+
+---
+
+## 4. Kiểm tra, chỉnh sửa & xác minh thực tế của thành viên
+- **Đồng bộ tên CSDL và cột khóa ngoại với TV2:** Đối chiếu thông tin trao đổi trong nhóm để thống nhất tên database là `book_store_db` (bảng mã `utf8mb4_unicode_ci`), đồng thời giữ chuẩn tên bảng `products` và cột khóa ngoại `product_id` thay vì `book_id` để khớp với ERD v2.
+- **Bảo toàn bảng hệ thống Laravel:** Kiểm tra và giữ nguyên 3 tệp migration mặc định (`password_resets`, `failed_jobs`, `personal_access_tokens`) nhằm tránh ảnh hưởng đến tính năng xác thực đăng nhập của khung dự án.
+- **Kiểm thử dữ liệu trên XAMPP:** Chạy thành công lệnh `php artisan migrate:fresh --seed`, kiểm tra trực tiếp cấu trúc bảng, khóa ngoại và dữ liệu mẫu trên phpMyAdmin, sau đó xuất tệp `book_store_db.sql` bàn giao cho thành viên Backend.
+- **Tuân thủ quy trình Git:** Kiểm tra `git status` để loại trừ tệp `.env`, đẩy mã nguồn lên nhánh `feature/database` và điều chỉnh nhánh đích (`base`) của Pull Request sang `BackEnd`.
+
+---
+
+## 5. Đánh giá hiệu quả
+- **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung migration và dữ liệu mẫu phong phú, giúp rút ngắn thời gian nhập liệu thủ công).
+- **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát từng cột dữ liệu, kiểm thử thực tế trên MySQL/phpMyAdmin và đối chiếu chuẩn xác với các thành viên trong nhóm trước khi nộp Pull Request.
