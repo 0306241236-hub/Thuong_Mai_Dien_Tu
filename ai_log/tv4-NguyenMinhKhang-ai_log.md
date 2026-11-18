@@ -96,7 +96,7 @@ AI đã hỗ trợ sinh mã nguồn và cấu trúc hoàn chỉnh cho 7 tệp tr
 ## 5. Đánh giá hiệu quả
 - **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung migration và dữ liệu mẫu phong phú, giúp rút ngắn thời gian nhập liệu thủ công).
 - **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát từng cột dữ liệu, kiểm thử thực tế trên MySQL/phpMyAdmin và đối chiếu chuẩn xác với các thành viên trong nhóm trước khi nộp Pull Request.
-# AI-04: Xây dựng chức năng Quản lý danh mục sản phẩm (TM-11)
+# AI-04 + AI-05: Xây dựng chức năng Quản lý danh mục sản phẩm (TM-11)
 
 - **Ngày thực hiện:** 12/11/2026
 - **Thẻ Trello:** TM-11 (Quản lý danh mục)
