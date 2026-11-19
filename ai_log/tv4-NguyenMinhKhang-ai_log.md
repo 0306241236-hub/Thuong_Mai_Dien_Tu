@@ -27,6 +27,7 @@
   2. Bổ sung các cột nghiệp vụ cần thiết cho giao diện và quy trình đặt hàng gồm: `role`, `phone`, `address` (bảng `users`); `shipping_address` (bảng `orders`); `image_url`, `description` (bảng `products`).
 - **Điểm AI gợi ý sai / dư thừa so với phạm vi đồ án (bác bỏ):**
   - AI đề xuất tách thêm bảng `carts` (quản lý phiên giỏ hàng) cùng các bảng phụ cho thanh toán và đơn vị vận chuyển. Đề xuất này **dư thừa** vì phạm vi đồ án giới hạn cứng trong **6 bảng**, đồng thời mỗi người dùng chỉ sở hữu một giỏ hàng duy nhất nên việc nối khóa ngoại `user_id` trực tiếp vào `cart_items` như thiết kế hiện tại đã tối ưu và gọn nhẹ hơn.
+  
   ## AI-02: Kiểm tra chuẩn 3NF (erd-v2) và tạo tài liệu đặc tả bảng (mo-ta-bang.md)
 
 - **Ngày thực hiện:** 10/11/2026 
@@ -53,6 +54,7 @@
   2. Tận dụng khung bảng Markdown của AI để trình bày rõ ràng các ràng buộc (`NOT NULL`, `UNIQUE`, `DEFAULT 0` cho `stock`, `DEFAULT 'pending'` cho `orders.status`) và quy tắc khóa ngoại (`ON DELETE RESTRICT` với `order_items` để tránh mất dữ liệu hóa đơn khi xóa sản phẩm), giúp TV2 (Backend) dễ dàng ánh xạ sang code.
 - **Điểm AI gợi ý dư thừa / chưa phù hợp thực tế (đã chỉnh sửa lại):**
   - AI đề xuất chuyển toàn bộ khóa chính `id` từ `INT` sang `UUID` (`CHAR(36)`) và dùng kiểu `ENUM` cứng trong CSDL cho `orders.status`. Nhóm đã thống nhất **không áp dụng** vì `INT` tự tăng (`AUTO_INCREMENT`) gọn nhẹ, dễ truy vấn và đủ đáp ứng quy mô đồ án 6 bảng; đồng thời dùng `VARCHAR` cho `status` giúp TV2 linh hoạt thêm/sửa trạng thái đơn hàng ở tầng code mà không phải chạy lệnh sửa cấu trúc bảng CSDL.
+
   # AI-03: Khởi tạo Database Migration & Seeder cho hệ thống Book Store
 
 - **Ngày thực hiện:** 11/11/2026
@@ -96,6 +98,7 @@ AI đã hỗ trợ sinh mã nguồn và cấu trúc hoàn chỉnh cho 7 tệp tr
 ## 5. Đánh giá hiệu quả
 - **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung migration và dữ liệu mẫu phong phú, giúp rút ngắn thời gian nhập liệu thủ công).
 - **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát từng cột dữ liệu, kiểm thử thực tế trên MySQL/phpMyAdmin và đối chiếu chuẩn xác với các thành viên trong nhóm trước khi nộp Pull Request.
+
 # AI-04 + AI-05: Xây dựng chức năng Quản lý danh mục sản phẩm (TM-11)
 
 - **Ngày thực hiện:** 12/11/2026
@@ -146,3 +149,8 @@ AI đã hỗ trợ sinh khung mã nguồn cho 8 tệp thuộc tính năng Quản
 ## 5. Đánh giá hiệu quả
 - **Mức độ hỗ trợ của AI:** ~75% (hỗ trợ sinh nhanh bộ khung Controller, giao diện Bootstrap 5 và các ca kiểm thử PHPUnit, giúp rút ngắn đáng kể thời gian lập trình lặp lại).
 - **Phần tự chủ của thành viên:** 100% mã nguồn được rà soát chuẩn hóa, tổ chức đúng cấu trúc thư mục dự án, chạy kiểm thử thực tế trên cả trình duyệt lẫn PHPUnit và khôi phục nguyên vẹn cơ sở dữ liệu mẫu trước khi tạo Pull Request.
+
+### [AI-06] Hoàn thiện kiểm tra trùng slug, phân quyền Admin và Unit Test (TM-11)
+- **Công cụ:** Gemini
+- **Mục đích:** Bổ sung hàm sinh slug tự động tránh trùng lặp (`generateUniqueSlug`) trong `CategoryService`, đăng ký alias middleware `admin` (`CheckAdmin`) trong `Kernel.php` để bảo vệ nhóm route `/admin/categories`, và cập nhật giả lập tài khoản Admin trong `CategoryManagementTest`.
+- **Kết quả kiểm thử:** Chạy `php artisan test --filter CategoryManagementTest` đạt **2/2 PASS** (`admin can crud empty category`, `cannot delete category that contains products`).
