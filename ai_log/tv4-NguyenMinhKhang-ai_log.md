@@ -154,3 +154,18 @@ AI đã hỗ trợ sinh khung mã nguồn cho 8 tệp thuộc tính năng Quản
 - **Công cụ:** Gemini
 - **Mục đích:** Bổ sung hàm sinh slug tự động tránh trùng lặp (`generateUniqueSlug`) trong `CategoryService`, đăng ký alias middleware `admin` (`CheckAdmin`) trong `Kernel.php` để bảo vệ nhóm route `/admin/categories`, và cập nhật giả lập tài khoản Admin trong `CategoryManagementTest`.
 - **Kết quả kiểm thử:** Chạy `php artisan test --filter CategoryManagementTest` đạt **2/2 PASS** (`admin can crud empty category`, `cannot delete category that contains products`).
+
+### [AI-07] Xây dựng CRUD Sản phẩm và kiểm tra MIME type thực tế khi tải ảnh bìa (TM-12)
+- **Công cụ:** Gemini
+- **Mục đích:** Xây dựng `ProductService` và `ProductController` quản lý đầy đủ sách (`name`, `author`, `price`, `stock`, `category_id`, `description`, `is_active`), bổ sung migration cột `is_active` và thiết lập kiểm tra upload ảnh bìa.
+- **Kỹ thuật áp dụng:** Sử dụng kết hợp rule `mimes:jpg,jpeg,png` và `mimetypes:image/jpeg,image/png` (đọc magic bytes qua `finfo_file` thay vì chỉ tin phần mở rộng tên tệp), giới hạn `max:2048` (2MB) và đổi tên tệp lưu trữ sang `Str::uuid()` trên disk `public`.
+- **Nội dung đã hoàn thành:**
+  - Cấu hình định tuyến (Routes) chuẩn hóa theo nhóm `admin` (`admin.products.*`) và bảo vệ qua middleware `CheckAdmin`.
+  - Xây dựng đầy đủ chức năng CRUD (Danh sách, Thêm mới, Cập nhật, Xóa) kết nối giữa `ProductController`, `ProductService` và Model `Product`.
+  - Thiết lập kiểm tra dữ liệu đầu vào (Validation): bắt buộc các trường thông tin cơ bản, giới hạn định dạng ảnh bìa (`JPG`, `PNG`) với dung lượng tối đa `2MB`.
+  - Hỗ trợ bật/tắt trạng thái hiển thị sản phẩm (`is_active`) và hiển thị ảnh bìa từ `storage`.
+  - Hoàn thiện giao diện Blade tại `resources/views/admin/products/` (`index`, `create`, `edit`).
+- **Các lỗi đã xử lý trong quá trình phát triển:**
+  - Khắc phục lỗi lồng tên route (`admin.admin.products.*`).
+  - Xử lý hiển thị giao diện và đồng bộ các trường dữ liệu (`full_name` ở bảng `users`, `slug` ở bảng `categories`) khi khởi tạo dữ liệu kiểm thử.
+- **Kết quả kiểm thử:** Đã kiểm tra hoạt động ổn định toàn bộ luồng Thêm, Sửa, Đổi trạng thái hiển thị, Upload ảnh và Xóa trên trình duyệt.
