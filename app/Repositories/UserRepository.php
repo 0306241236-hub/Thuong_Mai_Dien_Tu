@@ -1,13 +1,25 @@
 <?php
+
 namespace App\Repositories;
+
 use App\Models\User;
 
-class UserRepository extends BaseRepository
+class UserRepository
 {
-    public function getModel()
+    protected $model;
+
+    public function __construct(User $model)
     {
-        return User::class;
+        $this->model = $model;
     }
-    
-    // BaseRepository đã có sẵn hàm create() nên không cần viết lại ở đây
+
+    public function create(array $data)
+    {
+        return $this->model->create($data);
+    }
+
+    public function findByEmail(string $email)
+    {
+        return $this->model->where('email', $email)->first();
+    }
 }
