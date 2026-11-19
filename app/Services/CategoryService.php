@@ -18,13 +18,13 @@ class CategoryService
 
     public function create(array $data): Category
     {
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = $this->generateUniqueSlug($data['name']);
         return Category::create($data);
     }
 
     public function update(Category $category, array $data): bool
     {
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = $this->generateUniqueSlug($data['name'], $category->id);
         return $category->update($data);
     }
 
@@ -34,5 +34,22 @@ class CategoryService
             throw new Exception('Không thể xóa danh mục "' . $category->name . '" vì đang có ' . $category->products()->count() . ' sản phẩm trực thuộc!');
         }
         $category->delete();
+    }
+
+    private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $count = 1;
+
+        while (
+            Category::where('slug', $slug)
+                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $count++;
+        }
+
+        return $slug;
     }
 }

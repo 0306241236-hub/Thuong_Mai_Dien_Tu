@@ -6,14 +6,20 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\User;
 
 class CategoryManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_crud_empty_category(): void
-    {
-        // 1. Tạo mới
+  public function test_admin_can_crud_empty_category(): void
+{
+        $admin = new User();
+        $admin->id = 1;
+        $admin->role = 'admin';
+        $this->actingAs($admin);
+
+// 1. Tạo mới
         $response = $this->post(route('admin.categories.store'), [
             'name' => 'Sách Lịch Sử',
             'description' => 'Các đầu sách lịch sử Việt Nam và thế giới',
@@ -50,11 +56,16 @@ class CategoryManagementTest extends TestCase
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
     }
 
-    public function test_cannot_delete_category_that_contains_products(): void
+  public function test_cannot_delete_category_that_contains_products(): void
     {
+        $admin = new User();
+        $admin->id = 1;
+        $admin->role = 'admin';
+        $this->actingAs($admin);
+
         $category = Category::create([
-            'name' => 'Văn Học',
-            'slug' => 'van-hoc',
+            'name' => 'Văn học Việt Nam',
+            'slug' => 'van-hoc-viet-nam',
         ]);
 
         Product::create([

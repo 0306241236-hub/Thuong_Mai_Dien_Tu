@@ -5,7 +5,7 @@ use App\Http\Middleware\CheckAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\CategoryController;
 // Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
 Route::get('/', function () {
     if (Auth::check()) {
@@ -157,3 +157,10 @@ Route::get('/admin', function (Request $request) {
     </body>
     </html>';
 })->middleware(['auth', CheckAdmin::class]);
+// Quản lý danh mục sản phẩm (TM-11)
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('categories', CategoryController::class)->except(['show']);
+    });
