@@ -43,7 +43,7 @@ class AuthController extends Controller
             ], 200);
         }
 
-        return redirect($result['redirect_url']);
+        return redirect()->intended(is_array($result) ? ($result['redirect_url'] ?? '/') : '/');
     }
 
     public function logout(Request $request)

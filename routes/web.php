@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\CheckAdmin;
@@ -56,3 +56,9 @@ Route::get('/admin', function () {
         <button type="submit">Đăng xuất</button>
     </form>';
 })->middleware(['auth', CheckAdmin::class]);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [OrderController::class, 'create'])->name('checkout.create');
+    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
+});
