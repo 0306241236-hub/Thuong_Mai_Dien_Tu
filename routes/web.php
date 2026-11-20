@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 // Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
