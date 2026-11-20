@@ -3,6 +3,37 @@ use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\CheckAdmin;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
+// Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
+Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        return '
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head><meta charset="UTF-8"><title>Trang chủ</title></head>
+        <body style="font-family: sans-serif; max-width: 500px; margin: 60px auto; line-height: 1.6;">
+            <h2>Xin chào, ' . e($user->full_name) . '!</h2>
+            <p><strong>Email:</strong> ' . e($user->email) . '</p>
+            <p><strong>Quyền hiện tại (Role):</strong> <span style="color: blue; font-weight: bold;">' . e($user->role) . '</span></p>
+            <hr style="margin: 20px 0;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="/admin" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">
+                    Thử vào trang /admin
+                </a>
+                <form method="POST" action="/logout" style="margin: 0;">
+                    <button type="submit" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </body>
+        </html>';
+    }
 
 // Giao diện test Đăng ký
 Route::get('/register', function () {
@@ -62,3 +93,32 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
 });
+    return '
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head><meta charset="UTF-8"><title>Trang Quản Trị Admin</title></head>
+    <body style="font-family: sans-serif; max-width: 500px; margin: 60px auto; line-height: 1.6;">
+        <h2 style="color: green;">Chào mừng Admin đến với trang quản trị!</h2>
+        <p>Bạn đã vượt qua lớp bảo vệ <strong>CheckAdmin Middleware</strong>.</p>
+        <hr style="margin: 20px 0;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="/" style="padding: 8px 16px; background: #4b5563; color: white; text-decoration: none; border-radius: 4px;">
+                Về trang chủ
+            </a>
+            <form method="POST" action="/logout" style="margin: 0;">
+                <button type="submit" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
+    </body>
+    </html>';
+})->middleware(['auth', CheckAdmin::class]);
+// Quản lý danh mục & sản phẩm (TM-11, TM-12)
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::resource('products', ProductController::class)->except(['show']);
+    });

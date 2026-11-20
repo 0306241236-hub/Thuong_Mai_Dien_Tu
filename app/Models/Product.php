@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+   protected $fillable = [
         'category_id',
         'name',
         'author',
@@ -18,6 +18,13 @@ class Product extends Model
         'stock',
         'description',
         'image_url',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function category()
