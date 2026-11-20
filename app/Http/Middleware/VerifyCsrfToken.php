@@ -7,13 +7,12 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
 class VerifyCsrfToken extends Middleware
 {
     /**
-     * The URIs that should be excluded from CSRF verification.
+     * Các URI được loại trừ khỏi kiểm tra CSRF.
+     * Đã làm rỗng để bật bảo mật CSRF cho toàn bộ hệ thống.
      *
      * @var array<int, string>
      */
     protected $except = [
-    'register',
-    'login',
-    'logout',
-];
+        //
+    ];
 }
