@@ -9,11 +9,22 @@ use Illuminate\Support\Str;
 
 class ProductService
 {
-    public function getPaginatedProducts(int $perPage = 10)
+    public function getPaginatedProducts(array $filters = [], int $perPage = 10)
     {
-        return Product::with('category')
-            ->latest('id')
-            ->paginate($perPage);
+        $query = Product::with('category');
+
+        if (!empty($filters['keyword'])) {
+            $keyword = trim($filters['keyword']);
+            $query->where('name', 'like', "%{$keyword}%");
+        }
+
+        if (!empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        return $query->latest('id')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function createProduct(array $data, ?UploadedFile $imageFile = null): Product
@@ -27,7 +38,7 @@ class ProductService
 
     public function updateProduct(Product $product, array $data, ?UploadedFile $imageFile = null): Product
     {
-      if ($imageFile) {
+        if ($imageFile) {
             $this->deleteCoverImage($product->image_url);
             $data['image_url'] = $this->uploadCoverImage($imageFile);
         }
@@ -58,4 +69,4 @@ class ProductService
             Storage::disk('public')->delete($path);
         }
     }
-}
+}   
