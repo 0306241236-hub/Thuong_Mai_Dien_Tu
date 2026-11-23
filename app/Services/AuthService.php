@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -21,6 +21,7 @@ class AuthService
         $data['password'] = Hash::make($data['password']);
         $data['role'] = 'customer';
         $data['status'] = 'active';
+
         return $this->userRepository->create($data);
     }
 
@@ -49,5 +50,10 @@ class AuthService
             'user'     => $user,
             'redirect' => $user->role === 'admin' ? '/admin' : '/',
         ];
+    }
+
+    public function logout(): void
+    {
+        Auth::logout();
     }
 }
