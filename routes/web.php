@@ -1,11 +1,13 @@
 <?php
-use App\Http\Controllers\OrderController;
-use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
 use App\Http\Middleware\CheckAdmin;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+feature/khung-du-an-db
 feature/khung-du-an-db
 use Illuminate\Support\Facades\DB;
 /*
@@ -21,23 +23,33 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 // Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
+
+
+// Trang chủ hiển thị trạng thái đăng nhập, nút vào Admin và nút Đăng xuất
+develop
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
+        $displayName = $user->full_name ?? $user->name ?? 'Người dùng';
+
         return '
         <!DOCTYPE html>
         <html lang="vi">
         <head><meta charset="UTF-8"><title>Trang chủ</title></head>
-        <body style="font-family: sans-serif; max-width: 500px; margin: 60px auto; line-height: 1.6;">
-            <h2>Xin chào, ' . e($user->full_name) . '!</h2>
+        <body style="font-family: sans-serif; max-width: 520px; margin: 60px auto; line-height: 1.6;">
+            <h2>Xin chào, ' . e($displayName) . '!</h2>
             <p><strong>Email:</strong> ' . e($user->email) . '</p>
             <p><strong>Quyền hiện tại (Role):</strong> <span style="color: blue; font-weight: bold;">' . e($user->role) . '</span></p>
             <hr style="margin: 20px 0;">
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <a href="/admin" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">
-                    Thử vào trang /admin
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <a href="/admin/products" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">
+                    Quản lý sản phẩm
+                </a>
+                <a href="/admin" style="padding: 8px 16px; background: #4b5563; color: white; text-decoration: none; border-radius: 4px;">
+                    Trang /admin
                 </a>
                 <form method="POST" action="/logout" style="margin: 0;">
+                    ' . csrf_field() . '
                     <button type="submit" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
                         Đăng xuất
                     </button>
@@ -47,7 +59,22 @@ Route::get('/', function () {
         </html>';
     }
 
-// Giao diện test Đăng ký
+    return '
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head><meta charset="UTF-8"><title>Trang chủ</title></head>
+    <body style="font-family: sans-serif; max-width: 520px; margin: 60px auto; line-height: 1.6;">
+        <h2>Chào mừng đến với hệ thống</h2>
+        <p>Bạn chưa đăng nhập. Vui lòng chọn thao tác bên dưới:</p>
+        <div style="display: flex; gap: 12px;">
+            <a href="/login" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">Đăng nhập</a>
+            <a href="/register" style="padding: 8px 16px; background: #16a34a; color: white; text-decoration: none; border-radius: 4px;">Đăng ký</a>
+        </div>
+    </body>
+    </html>';
+});
+
+// Giao diện & xử lý Đăng ký
 Route::get('/register', function () {
     return '<form method="POST" action="/register">
         ' . csrf_field() . '
@@ -62,10 +89,10 @@ Route::get('/register', function () {
 });
 Route::post('/register', [AuthController::class, 'register']);
 
-// Giao diện test Đăng nhập
+// Giao diện & xử lý Đăng nhập
 Route::get('/login', function () {
     $error = session('errors') ? session('errors')->first('email') : '';
-    return '<p style="color:red;">' . $error . '</p>
+    return '<p style="color:red;">' . e($error) . '</p>
     <form method="POST" action="/login">
         ' . csrf_field() . '
         Email: <input type="email" name="email" required><br>
@@ -79,33 +106,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 BackEnd
 
-// Trang chủ (Dành cho Customer hoặc User đã đăng nhập)
-Route::get('/', function () {
-    if (!auth()->check()) return 'Vui lòng <a href="/login">Đăng nhập</a>';
-    
-    return '<h1>Trang chủ (Khách hàng)</h1>
-    <p>Xin chào, ' . auth()->user()->full_name . '</p>
-    <form method="POST" action="/logout">
-        ' . csrf_field() . '
-        <button type="submit">Đăng xuất</button>
-    </form>';
-})->middleware('auth');
-
-// Trang Quản trị (Chỉ dành cho Admin)
-Route::get('/admin', function () {
-    return '<h1>Trang Quản Trị (Admin)</h1>
-    <p>Xin chào quản trị viên: ' . auth()->user()->full_name . '</p>
-    <form method="POST" action="/logout">
-        ' . csrf_field() . '
-        <button type="submit">Đăng xuất</button>
-    </form>';
-})->middleware(['auth', CheckAdmin::class]);
-
+// Thanh toán & đặt hàng (Customer)
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [OrderController::class, 'create'])->name('checkout.create');
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
 });
+feature/khung-du-an-db
 feature/khung-du-an-db
 
 Route::get('/test-db', function () {
@@ -116,19 +123,29 @@ Route::get('/test-db', function () {
         return 'Lỗi kết nối CSDL: ' . $e->getMessage();
     }
 });
+// Trang tổng quan Quản trị (Admin)
+Route::get('/admin', function () {
+ develop
     return '
     <!DOCTYPE html>
     <html lang="vi">
     <head><meta charset="UTF-8"><title>Trang Quản Trị Admin</title></head>
-    <body style="font-family: sans-serif; max-width: 500px; margin: 60px auto; line-height: 1.6;">
+    <body style="font-family: sans-serif; max-width: 520px; margin: 60px auto; line-height: 1.6;">
         <h2 style="color: green;">Chào mừng Admin đến với trang quản trị!</h2>
         <p>Bạn đã vượt qua lớp bảo vệ <strong>CheckAdmin Middleware</strong>.</p>
         <hr style="margin: 20px 0;">
-        <div style="display: flex; gap: 12px; align-items: center;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <a href="/admin/products" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">
+                Quản lý sản phẩm
+            </a>
+            <a href="/admin/categories" style="padding: 8px 16px; background: #0d9488; color: white; text-decoration: none; border-radius: 4px;">
+                Quản lý danh mục
+            </a>
             <a href="/" style="padding: 8px 16px; background: #4b5563; color: white; text-decoration: none; border-radius: 4px;">
                 Về trang chủ
             </a>
             <form method="POST" action="/logout" style="margin: 0;">
+                ' . csrf_field() . '
                 <button type="submit" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Đăng xuất
                 </button>
@@ -137,6 +154,7 @@ Route::get('/test-db', function () {
     </body>
     </html>';
 })->middleware(['auth', CheckAdmin::class]);
+
 // Quản lý danh mục & sản phẩm (TM-11, TM-12)
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
@@ -144,5 +162,8 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
+feature/khung-du-an-db
     });
 BackEnd
+    });
+develop

@@ -22,7 +22,33 @@
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-
+<div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.products.index') }}" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <input type="text"
+                           name="keyword"
+                           class="form-control"
+                           placeholder="Nhập tên sách cần tìm..."
+                           value="{{ request('keyword') }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category_id" class="form-select">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">Đặt lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="card shadow-sm">
         <div class="card-body table-responsive">
             <table class="table table-bordered table-hover align-middle mb-0">
@@ -71,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">Chưa có sản phẩm nào. Hãy bấm "+ Thêm sách mới".</td>
+                            <td colspan="8" class="text-center text-muted py-4">Không tìm thấy sách phù hợp.".</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -80,8 +106,8 @@
     </div>
 
     @if(method_exists($products, 'links'))
-        <div class="mt-3">{{ $products->links() }}</div>
-    @endif
+    <div class="mt-3">{{ $products->links('pagination::bootstrap-5') }}</div>
+@endif
 </div>
 </body>
 </html>
