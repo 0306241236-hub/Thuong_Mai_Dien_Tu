@@ -6,6 +6,18 @@ use App\Http\Middleware\CheckAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+feature/khung-du-an-db
+use Illuminate\Support\Facades\DB;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 // Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
@@ -65,6 +77,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Xử lý Đăng xuất
 Route::post('/logout', [AuthController::class, 'logout']);
+BackEnd
 
 // Trang chủ (Dành cho Customer hoặc User đã đăng nhập)
 Route::get('/', function () {
@@ -92,6 +105,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [OrderController::class, 'create'])->name('checkout.create');
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
+});
+feature/khung-du-an-db
+
+Route::get('/test-db', function () {
+    try {
+        DB::connection()->getPdo();
+        return 'Kết nối CSDL thành công! Đang sử dụng DB: ' . DB::connection()->getDatabaseName();
+    } catch (\Exception $e) {
+        return 'Lỗi kết nối CSDL: ' . $e->getMessage();
+    }
 });
     return '
     <!DOCTYPE html>
@@ -122,3 +145,4 @@ Route::middleware(['auth', 'admin'])
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
     });
+BackEnd
