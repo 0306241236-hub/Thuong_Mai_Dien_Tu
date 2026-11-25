@@ -5,7 +5,7 @@
             <span>Nhà sách trực tuyến dành cho sinh viên</span>
             <div>
                 @auth
-                    <span class="me-2">Xin chào, <strong class="text-dark">{{ Auth::user()->name }}</strong></span>
+                    <span class="me-2">Xin chào, <strong class="text-dark">{{ Auth::user()->full_name ?? Auth::user()->name }}</strong></span>
                     <form action="{{ url('/logout') }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-link btn-sm text-secondary text-decoration-none p-0">Đăng xuất</button>
