@@ -5,17 +5,19 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class CheckAdmin
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        // Kiểm tra đã đăng nhập chưa và vai trò có phải admin không
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return response()->json([
-                'message' => 'Truy cập bị từ chối! Bạn không có quyền quản trị viên.'
-            ], 403);
+        // 1. Chưa đăng nhập -> đẩy về trang đăng nhập
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        // 2. Đã đăng nhập nhưng role không phải 'admin' (tức là 'customer') -> chặn và đẩy về /products
+        if (Auth::user()->role !== 'admin') {
+            return redirect('/products')->with('error', 'Bạn không có quyền truy cập trang quản trị Admin!');
         }
 
         return $next($request);
