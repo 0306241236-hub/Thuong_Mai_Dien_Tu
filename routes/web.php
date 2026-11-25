@@ -7,8 +7,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-feature/khung-du-an-db
-feature/khung-du-an-db
 use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
@@ -20,58 +18,30 @@ use Illuminate\Support\Facades\DB;
 | contains the "web" middleware group. Now create something great!
 |
 */
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProductController;
-// Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
-
-
-// Trang chủ hiển thị trạng thái đăng nhập, nút vào Admin và nút Đăng xuất
-develop
 Route::get('/', function () {
-    if (Auth::check()) {
-        $user = Auth::user();
-        $displayName = $user->full_name ?? $user->name ?? 'Người dùng';
+    $categories = [
+        ['name' => 'Công nghệ thông tin', 'slug' => 'cntt', 'count' => 24],
+        ['name' => 'Kinh tế', 'slug' => 'kinh-te', 'count' => 18],
+        ['name' => 'Toán học', 'slug' => 'toan-hoc', 'count' => 16],
+        ['name' => 'Ngoại ngữ', 'slug' => 'ngoai-ngu', 'count' => 20],
+        ['name' => 'Kỹ năng', 'slug' => 'ky-nang', 'count' => 12],
+    ];
 
-        return '
-        <!DOCTYPE html>
-        <html lang="vi">
-        <head><meta charset="UTF-8"><title>Trang chủ</title></head>
-        <body style="font-family: sans-serif; max-width: 520px; margin: 60px auto; line-height: 1.6;">
-            <h2>Xin chào, ' . e($displayName) . '!</h2>
-            <p><strong>Email:</strong> ' . e($user->email) . '</p>
-            <p><strong>Quyền hiện tại (Role):</strong> <span style="color: blue; font-weight: bold;">' . e($user->role) . '</span></p>
-            <hr style="margin: 20px 0;">
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <a href="/admin/products" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">
-                    Quản lý sản phẩm
-                </a>
-                <a href="/admin" style="padding: 8px 16px; background: #4b5563; color: white; text-decoration: none; border-radius: 4px;">
-                    Trang /admin
-                </a>
-                <form method="POST" action="/logout" style="margin: 0;">
-                    ' . csrf_field() . '
-                    <button type="submit" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Đăng xuất
-                    </button>
-                </form>
-            </div>
-        </body>
-        </html>';
-    }
+    $featuredBooks = [
+        ['id' => 1, 'title' => 'Lập trình C cơ bản', 'author' => 'Nguyễn Văn An', 'price' => 85000],
+        ['id' => 2, 'title' => 'Kinh tế vi mô', 'author' => 'Trần Minh Hà', 'price' => 120000],
+        ['id' => 3, 'title' => 'Toán cao cấp 1', 'author' => 'Lê Thị Mai', 'price' => 95000],
+        ['id' => 4, 'title' => 'Tiếng Anh học thuật', 'author' => 'Phạm Thu Trang', 'price' => 110000],
+    ];
 
-    return '
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head><meta charset="UTF-8"><title>Trang chủ</title></head>
-    <body style="font-family: sans-serif; max-width: 520px; margin: 60px auto; line-height: 1.6;">
-        <h2>Chào mừng đến với hệ thống</h2>
-        <p>Bạn chưa đăng nhập. Vui lòng chọn thao tác bên dưới:</p>
-        <div style="display: flex; gap: 12px;">
-            <a href="/login" style="padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px;">Đăng nhập</a>
-            <a href="/register" style="padding: 8px 16px; background: #16a34a; color: white; text-decoration: none; border-radius: 4px;">Đăng ký</a>
-        </div>
-    </body>
-    </html>';
+    $newBooks = [
+        ['id' => 5, 'title' => 'Cấu trúc dữ liệu và giải thuật', 'author' => 'Hoàng Đức Minh', 'price' => 135000],
+        ['id' => 6, 'title' => 'Kỹ năng học đại học', 'author' => 'Võ Thanh Tùng', 'price' => 65000],
+        ['id' => 7, 'title' => 'Xác suất thống kê', 'author' => 'Đặng Quốc Bảo', 'price' => 90000],
+        ['id' => 8, 'title' => 'Nguyên lý kế toán', 'author' => 'Bùi Thị Lan', 'price' => 105000],
+    ];
+
+    return view('home', compact('categories', 'featuredBooks', 'newBooks'));
 });
 
 // Giao diện & xử lý Đăng ký
@@ -104,7 +74,6 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Xử lý Đăng xuất
 Route::post('/logout', [AuthController::class, 'logout']);
-BackEnd
 
 // Thanh toán & đặt hàng (Customer)
 Route::middleware('auth')->group(function () {
@@ -112,8 +81,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
 });
-feature/khung-du-an-db
-feature/khung-du-an-db
 
 Route::get('/test-db', function () {
     try {
@@ -125,7 +92,6 @@ Route::get('/test-db', function () {
 });
 // Trang tổng quan Quản trị (Admin)
 Route::get('/admin', function () {
- develop
     return '
     <!DOCTYPE html>
     <html lang="vi">
@@ -162,8 +128,7 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
-feature/khung-du-an-db
     });
-BackEnd
-    });
-develop
+Route::get('/layout-mau', function () {
+    return view('sample');
+});
