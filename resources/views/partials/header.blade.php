@@ -23,7 +23,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
         <div class="container">
             <!-- Logo -->
-            <a class="navbar-brand fw-bold fs-4 text-dark m-0" href="{{ url('/') }}">
+            <a class="navbar-brand fw-bold fs-4 text-dark m-0" href="{{ url('/trang-chu') }}">
                 Sách Sinh Viên
             </a>
 
