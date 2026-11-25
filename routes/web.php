@@ -7,8 +7,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-feature/khung-du-an-db
-feature/khung-du-an-db
 use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
@@ -20,13 +18,10 @@ use Illuminate\Support\Facades\DB;
 | contains the "web" middleware group. Now create something great!
 |
 */
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProductController;
 // Trang chủ hiển thị trạng thái đăng nhập, nút test Admin và nút Đăng xuất
 
 
 // Trang chủ hiển thị trạng thái đăng nhập, nút vào Admin và nút Đăng xuất
-develop
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
@@ -104,7 +99,6 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Xử lý Đăng xuất
 Route::post('/logout', [AuthController::class, 'logout']);
-BackEnd
 
 // Thanh toán & đặt hàng (Customer)
 Route::middleware('auth')->group(function () {
@@ -112,8 +106,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
 });
-feature/khung-du-an-db
-feature/khung-du-an-db
 
 Route::get('/test-db', function () {
     try {
@@ -125,7 +117,6 @@ Route::get('/test-db', function () {
 });
 // Trang tổng quan Quản trị (Admin)
 Route::get('/admin', function () {
- develop
     return '
     <!DOCTYPE html>
     <html lang="vi">
@@ -162,8 +153,7 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
-feature/khung-du-an-db
     });
-BackEnd
-    });
-develop
+Route::get('/layout-mau', function () {
+    return view('sample');
+});
