@@ -13,9 +13,12 @@ class CategoryController extends Controller
 {
     public function __construct(protected CategoryService $categoryService) {}
 
-    public function index(Request $request)
+  public function index(Request $request)
     {
-        $categories = $this->categoryService->getAll($request->query('keyword'));
+        $keyword = $request->query('keyword');
+        $keyword = is_string($keyword) ? trim($keyword) : null;
+
+        $categories = $this->categoryService->getAll($keyword);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -63,6 +66,12 @@ class CategoryController extends Controller
 
     private function validateCategory(Request $request, ?int $categoryId = null): array
     {
+        if (is_string($request->input('name'))) {
+            $request->merge([
+                'name' => preg_replace('/\s+/', ' ', trim($request->input('name'))),
+            ]);
+        }
+
         return $request->validate([
             'name' => [
                 'required',
