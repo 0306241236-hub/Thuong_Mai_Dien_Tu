@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Product;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\AuthController;
@@ -19,30 +21,39 @@ use Illuminate\Support\Facades\DB;
 |
 */
 Route::get('/', function () {
-    $categories = [
-        ['name' => 'Công nghệ thông tin', 'slug' => 'cntt', 'count' => 24],
-        ['name' => 'Kinh tế', 'slug' => 'kinh-te', 'count' => 18],
-        ['name' => 'Toán học', 'slug' => 'toan-hoc', 'count' => 16],
-        ['name' => 'Ngoại ngữ', 'slug' => 'ngoai-ngu', 'count' => 20],
-        ['name' => 'Kỹ năng', 'slug' => 'ky-nang', 'count' => 12],
-    ];
+    $categories = Category::withCount(['products' => function ($query) {
+        $query->where('is_active', true);
+    }])->get();
 
-    $featuredBooks = [
-        ['id' => 1, 'title' => 'Lập trình C cơ bản', 'author' => 'Nguyễn Văn An', 'price' => 85000],
-        ['id' => 2, 'title' => 'Kinh tế vi mô', 'author' => 'Trần Minh Hà', 'price' => 120000],
-        ['id' => 3, 'title' => 'Toán cao cấp 1', 'author' => 'Lê Thị Mai', 'price' => 95000],
-        ['id' => 4, 'title' => 'Tiếng Anh học thuật', 'author' => 'Phạm Thu Trang', 'price' => 110000],
-    ];
+    $newBooks = Product::with('category')
+        ->where('is_active', true)
+        ->latest()
+        ->take(8)
+        ->get();
 
-    $newBooks = [
-        ['id' => 5, 'title' => 'Cấu trúc dữ liệu và giải thuật', 'author' => 'Hoàng Đức Minh', 'price' => 135000],
-        ['id' => 6, 'title' => 'Kỹ năng học đại học', 'author' => 'Võ Thanh Tùng', 'price' => 65000],
-        ['id' => 7, 'title' => 'Xác suất thống kê', 'author' => 'Đặng Quốc Bảo', 'price' => 90000],
-        ['id' => 8, 'title' => 'Nguyên lý kế toán', 'author' => 'Bùi Thị Lan', 'price' => 105000],
-    ];
+    $categoriesWithBooks = Category::with(['products' => function ($query) {
+        $query->where('is_active', true)->latest()->take(4);
+    }])->get();
 
-    return view('home', compact('categories', 'featuredBooks', 'newBooks'));
-});
+    return view('home', compact('categories', 'newBooks', 'categoriesWithBooks'));
+})->name('home');
+
+// Danh sách & lọc sách theo danh mục
+Route::get('/products', function (Illuminate\Http\Request $request) {
+    $categories = Category::all();
+    $query = Product::where('is_active', true);
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+    if ($request->filled('category')) {
+        $slug = $request->category;
+        $query->whereHas('category', fn($q) => $q->where('slug', $slug));
+    }
+
+    $books = $query->latest()->get();
+    return view('products.index', compact('categories', 'books'));
+})->name('products.index');
 
 // Giao diện & xử lý Đăng ký
 Route::get('/register', function () {

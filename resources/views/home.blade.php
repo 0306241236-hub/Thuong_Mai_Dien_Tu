@@ -14,52 +14,64 @@
         </form>
     </section>
 
-    <!-- 2. Khối khám phá theo danh mục (5 danh mục chuẩn wireframe) -->
+    <!-- 2. Khối khám phá theo danh mục (Dữ liệu thật từ CSDL) -->
     <section class="mb-5">
         <h2 class="fw-bold fs-5 mb-3">Khám phá theo danh mục</h2>
         <div class="row row-cols-2 row-cols-md-5 g-3">
-            @foreach ($categories as $cat)
+            @forelse ($categories as $cat)
                 <div class="col">
-                    <a href="{{ url('/products?category=' . $cat['slug']) }}" class="text-decoration-none text-dark">
+                    <a href="{{ url('/products?category=' . $cat->slug) }}" class="text-decoration-none text-dark">
                         <div class="p-3 bg-light border rounded-2 h-100">
-                            <div class="fw-semibold small mb-1">{{ $cat['name'] }}</div>
-                            <div class="text-secondary" style="font-size: 0.8rem;">{{ $cat['count'] }} đầu sách</div>
+                            <div class="fw-semibold small mb-1">{{ $cat->name }}</div>
+                            <div class="text-secondary" style="font-size: 0.8rem;">{{ $cat->products_count ?? 0 }} đầu sách</div>
                         </div>
                     </a>
                 </div>
-            @endforeach
+            @empty
+                <div class="col-12">
+                    <p class="text-secondary small mb-0">Chưa có danh mục nào trong cơ sở dữ liệu.</p>
+                </div>
+            @endforelse
         </div>
     </section>
 
-    <!-- 3. Khối Sách nổi bật -->
+    <!-- 3. Khối 8 Sách mới nhất (Dữ liệu thật từ CSDL) -->
     <section class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="fw-bold fs-5 m-0">Sách nổi bật</h2>
-            <a href="{{ url('/products') }}" class="text-dark small text-decoration-underline">Xem tất cả sách &rarr;</a>
-        </div>
-
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-            @foreach ($featuredBooks as $book)
-                <div class="col">
-                    @include('partials.product-card', ['book' => $book])
-                </div>
-            @endforeach
-        </div>
-    </section>
-
-    <!-- 4. Khối Sách mới (Bổ sung theo yêu cầu Ngày 3) -->
-    <section>
-        <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="fw-bold fs-5 m-0">Sách mới cập nhật</h2>
-            <a href="{{ url('/products?sort=newest') }}" class="text-dark small text-decoration-underline">Xem thêm &rarr;</a>
+            <a href="{{ url('/products?sort=newest') }}" class="text-dark small text-decoration-underline">Xem tất cả sách &rarr;</a>
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-            @foreach ($newBooks as $book)
+            @forelse ($newBooks as $book)
                 <div class="col">
                     @include('partials.product-card', ['book' => $book])
                 </div>
-            @endforeach
+            @empty
+                <div class="col-12">
+                    <p class="text-secondary small mb-0">Chưa có sách mới nào.</p>
+                </div>
+            @endforelse
         </div>
     </section>
+
+    <!-- 4. Khối Sách theo từng danh mục (Dữ liệu thật từ CSDL) -->
+    @foreach ($categoriesWithBooks as $cat)
+        @if ($cat->products->isNotEmpty())
+            <section class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="fw-bold fs-5 m-0">{{ $cat->name }}</h2>
+                    <a href="{{ url('/products?category=' . $cat->slug) }}" class="text-dark small text-decoration-underline">Xem thêm &rarr;</a>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+                    @foreach ($cat->products as $book)
+                        <div class="col">
+                            @include('partials.product-card', ['book' => $book])
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+    @endforeach
 @endsection

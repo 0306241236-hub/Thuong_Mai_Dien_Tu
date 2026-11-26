@@ -1,89 +1,101 @@
-# AI log – TV3 – Nguyễn Quốc Hội
+# [AI Log] - Buổi 1
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Phác thảo wireframe 6 màn hình, chọn thư viện UI, viết User Story (TM-01, TM-02, TM-03) và thiết lập quy trình Git/PR.
 
-| Mục | Thông tin |
-| Họ tên, MSSV | Nguyễn Quốc Hội – 0306231376 |
-| Nhóm, đề tài | Nhóm 5 – Đồ án Web Thương Mại Điện Tử (Bán Sách) |
-| Vai trò | TV3 – Frontend Lead |
-| Công cụ AI dùng | Gemini |
+## 1. Prompt đã sử dụng
+**Prompt 1 (Bố cục giao diện & Wireframe):**
+> "Gợi ý bố cục trang danh sách sách có tìm kiếm, lọc, phân trang, hiển thị tốt trên điện thoại cho website bán sách thương mại điện tử."
 
-## Bảng tổng hợp
+**Prompt 2 (Git & Quy trình làm việc nhóm):**
+> "Hướng dẫn cách chuyển từ repo cũ sang repo mới Thuong_Mai_Dien_Tu, tạo nhánh docs/wireframe, đưa 6 ảnh wireframe vào thư mục docs/wireframes và mở Pull Request vào nhánh develop."
 
-| Mã | Ngày | Giai đoạn | Nội dung | Commit / PR |
-| AI-01 | 13/11 | Thiết kế/Lập trình | Dựng Layout chung (Header, Nav, Footer) | PR #3 |
-| AI-02 | 13/11 | Lập trình | Cấu trúc HTML/CSS Grid cho [TM-01] Trang chủ | PR [Số PR mới nhất] |
-| AI-03 | 14/11 | Lập trình | Dựng form Đăng ký/Đăng nhập và kiểm tra accessibility (TM-04) | PR [Số PR Ngày 4] |
-| AI-04 | 14/11 | Kiểm thử | Sửa lỗi liên kết href="#" không chuyển được trang | PR [Số PR Ngày 4] |
-| AI-05 | 16/11 | Lập trình | Dùng JavaScript đổ dữ liệu thật cho [TM-01] Trang chủ | PR [Số PR Ngày 6] |
+## 2. Kết quả từ AI & Xác thực
+- **Về bố cục Wireframe & UI:** AI gợi ý sử dụng hệ thống lưới (Grid) 4 cột trên màn hình máy tính và thu gọn còn 2 cột trên điện thoại (360px), kết hợp thanh tìm kiếm ở Header và bộ lọc danh mục/khoảng giá thu gọn. Đã đối chiếu với yêu cầu đề tài để đảm bảo đủ các thành phần cho 6 màn hình (Trang chủ, Danh sách, Chi tiết sách, Giỏ hàng, Đặt hàng, Quản trị).
+- **Về Git:** AI hướng dẫn quy trình clone repo mới về máy, đồng bộ nhánh `develop`, tách nhánh riêng `docs/wireframe` để tránh xung đột mã nguồn và tạo Pull Request chờ duyệt.
+
+## 3. Cách áp dụng vào dự án
+- Hoàn thiện 6 bản phác thảo wireframe và đẩy lên thư mục `docs/wireframes/` qua nhánh `docs/wireframe` (PR #32).
+- Thống nhất chọn thư viện **Bootstrap 5** để xây dựng giao diện responsive nhanh và đồng bộ với cấu trúc Blade của Laravel.
+- Tạo đầy đủ 3 thẻ User Story cho chức năng **TM-01** (Trang chủ), **TM-02** (Tìm kiếm, lọc sách) và **TM-03** (Chi tiết sản phẩm) trên bảng Trello của nhóm.
+
 ---
 
-### [AI-01] Dựng Layout chung (Header, Nav, Footer)
-- Ngày / Người dùng: 2026-11-13 / Nguyễn Quốc Hội
-- Công cụ: Gemini
-- Giai đoạn: Thiết kế / Lập trình
-- Task / Commit / PR: Dựng Layout chung / PR #3 (nhánh `feature/layout`)
-- Mục đích: Lấy khung HTML semantic (header, main, footer) và CSS cơ bản để tạo giao diện tổng thể ban đầu cho dự án, có thanh tìm kiếm và menu.
-- Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "Hướng dẫn tạo layout HTML CSS cho trang web bán sách bao gồm top bar, header, menu và footer" *(Ghi chú: Nội dung prompt thực tế trước ngày 3)*
-- Kết quả AI trả về (tóm tắt): AI cung cấp file `index.html` chứa cấu trúc thẻ Semantic và `style.css` định dạng Flexbox cho Header/Footer, kèm media query cho mobile (768px).
-- Đánh giá: Đúng - Cấu trúc rõ ràng, đáp ứng tốt yêu cầu layout ban đầu, tiết kiệm thời gian dựng khung.
-- Đã chỉnh sửa gì: Chỉnh sửa lại nội dung văn bản (Tên nhà sách, liên hệ) và tích hợp vào dự án qua Git.
-- Cách kiểm chứng: Mở `index.html` trên trình duyệt xem thử, kiểm tra Responsive qua DevTools ở mức 768px.
-- Tỷ lệ nội dung AI còn giữ lại (ước lượng): 85%
-- Điều học được: Cách sử dụng Flexbox để dàn trang Header và Footer nhanh chóng, cùng với quy trình tạo branch `feature/layout` trên Git.
+# [AI Log] - Buổi 2
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Dựng bộ khung layout chung (Header, Menu danh mục, Footer), tối ưu hiển thị responsive 360px và tạo trang mẫu tái sử dụng cho cả nhóm[cite: 20, 21].
 
-### [AI-02] Cấu trúc HTML/CSS Grid cho [TM-01] Trang chủ và Thẻ sản phẩm
-- Ngày / Người dùng: 2026-11-13 / Nguyễn Quốc Hội
-- Công cụ: Gemini
-- Giai đoạn: Lập trình
-- Task / Commit / PR: [TM-01] Trang chủ / `feat (TM-01): trang chu du lieu gia` / PR mới nhất
-- Mục đích: Cắt HTML/CSS cho khối "Sách mới cập nhật", xây dựng component "Thẻ sản phẩm" và cấu hình CSS Grid để giao diện responsive (tự nhảy cột) từ 1366px xuống 360px.
-- Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "Code dùm tôi luôn đi nhớ dựa vào ảnh mà tôi đã gửi ở trên... làm tiếp tục phần còn lại hết của TV3 đi"
-- Kết quả AI trả về (tóm tắt): Cung cấp đoạn mã `<section>` chứa lưới sản phẩm dùng `display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));`. Cung cấp CSS cho thẻ sản phẩm (hiệu ứng hover) và `@media (max-width: 576px)` ép thành 2 cột cho mobile.
-- Đánh giá: Đúng - Component thẻ sản phẩm đẹp, đúng chuẩn. Lưới Grid hoạt động cực kỳ linh hoạt mà không cần viết quá nhiều Media Query.
-- Đã chỉnh sửa gì: Tái sử dụng component thẻ sản phẩm để nhân bản ra thêm khối "Sách Chuyên Ngành CNTT" theo đúng yêu cầu Trello [TM-01].
-- Cách kiểm chứng: Mở trực tiếp file `index.html` trên trình duyệt, dùng DevTools kiểm tra hiển thị ở 2 mức kích thước 1366px (lên được 4-5 cột) và 360px (ép về 2 cột gọn gàng) mà không bị vỡ khung. Đã chụp ảnh báo cáo lên Pull Request.
-- Tỷ lệ mã AI còn giữ lại (ước lượng): 95%
-- Điều học được: Cách khôi phục file bị ẩn khi chuyển nhánh nhầm trên Git. Hiểu được sức mạnh của hàm `minmax()` trong CSS Grid giúp tự động chia cột thông minh.
+## 1. Prompt đã sử dụng
+**Prompt 1 (Cấu trúc Layout & Partial View trong Laravel Blade):**
+> "Gợi ý cấu trúc component/partial view cho layout chung trong Laravel Blade sử dụng Bootstrap 5 gồm header (logo, ô tìm kiếm, giỏ hàng, đăng nhập), menu danh mục và footer, tự kiểm tra hiển thị tốt ở màn hình điện thoại 360px."
 
-### [AI-03] Dựng form Đăng ký/Đăng nhập và kiểm tra accessibility (TM-04)
+**Prompt 2 (Chuyển đổi thiết kế Wireframe sang mã giao diện):**
+> "Dựa trên bản phác thảo wireframe Sách Sinh Viên (tông màu tối giản trắng - xám nhạt - đen than #3a3a3a), viết mã Blade cho file layout chính (app.blade.php), header, footer và trang mẫu trang chủ để các thành viên khác kế thừa bằng @extends."
 
-- Ngày / Người dùng: 2026-11-14 / Nguyễn Quốc Hội
-- Công cụ: Gemini
-- Giai đoạn: Lập trình
-- Task / Commit / PR: [TM-04] Trang đăng ký/đăng nhập giao diện / `feat (TM-04): giao dien dang ky dang nhap` / PR [Số PR Ngày 4]
-- Mục đích: Tạo 2 file `login.html`, `register.html` dựa trên layout chung; thêm chỗ trống hiển thị lỗi; cập nhật header có nút đăng xuất và tên người dùng; đảm bảo form đạt chuẩn accessibility.
-- Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "3,4 đưa code tôi chép", yêu cầu code form theo hướng dẫn ngày 4.
-- Kết quả AI trả về (tóm tắt): Sinh ra code HTML hoàn chỉnh cho 2 trang, bổ sung class `error-message`, thêm thẻ `label for="..."` và thuộc tính `autocomplete` (`email`, `current-password`, `new-password`) vào các input.
-- Đánh giá: Đúng - Giao diện trực quan, code form đầy đủ thuộc tính chuẩn giúp trình duyệt tự động điền (autofill) dễ dàng hơn.
-- Đã chỉnh sửa gì: Copy và chèn trực tiếp vào thư mục dự án Front_end, thêm CSS đi kèm vào file `style.css`.
-- Cách kiểm chứng: Mở trực tiếp trên trình duyệt, kiểm tra trực quan giao diện form và header.
-- Tỷ lệ mã AI còn giữ lại (ước lượng): 95%
-- Điều học được: Cách ứng dụng thuộc tính `autocomplete` để tăng cường trải nghiệm người dùng (UX) và accessibility cho web.
+## 2. Kết quả từ AI & Xác thực
+- **Về tổ chức Partial View:** AI đề xuất tách nhỏ giao diện thành các tệp dùng chung trong `resources/views/partials/` (`header.blade.php`, `footer.blade.php`) và nhúng vào khung sườn chính `resources/views/layouts/app.blade.php` bằng chỉ thị `@include` và `@yield('content')`. Đã kiểm chứng trên tài liệu Blade của Laravel: cách chia này giúp tránh lặp mã HTML khi các thành viên phát triển các trang chức năng riêng biệt.
+- **Về thiết kế & Responsive 360px:** AI sử dụng lớp `navbar-expand-lg` của Bootstrap 5 để tự động thu gọn thanh điều hướng thành nút menu trên màn hình hẹp và hệ thống lưới `row-cols-*` để chia cột linh hoạt. Đã tự kiểm tra thực tế trên trình duyệt bằng DevTools ở kích thước **360px**: giao diện hiển thị gọn, chữ không tràn khung ngang.
 
-### [AI-04] Sửa lỗi liên kết href="#" không chuyển được trang
+## 3. Cách áp dụng vào dự án
+- Tạo đầy đủ bộ khung giao diện chung đồng bộ với 6 bản wireframe tại `resources/views/layouts/app.blade.php`, `resources/views/partials/header.blade.php` và `resources/views/partials/footer.blade.php`[cite: 20, 23].
+- Xây dựng trang mẫu `resources/views/sample.blade.php` (kèm route kiểm thử `/layout-mau`) theo đúng thiết kế Màn hình 01 để làm mẫu tái sử dụng cho cả nhóm[cite: 21, 23].
+- Đẩy mã nguồn lên nhánh `feature/layout` với commit `feat: layout chung header footer`, mở Pull Request vào `develop` và cập nhật tiến độ thẻ `[FE] Layout chung` trên Trello[cite: 21, 22].
 
-- Ngày / Người dùng: 2026-11-14 / Nguyễn Quốc Hội
-- Công cụ: Gemini
-- Giai đoạn: Kiểm thử
-- Task / Commit / PR: [TM-04] Trang đăng ký/đăng nhập giao diện / `feat (TM-04): giao dien dang ky dang nhap` / PR [Số PR Ngày 4]
-- Mục đích: Sửa lỗi click vào nút "Đăng nhập" trên thanh menu nhưng không chuyển sang trang `login.html` mà URL chỉ bị thêm dấu `#`.
-- Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "sao tôi bấm chỗ đăng nhập thì không được" (kèm ảnh chụp màn hình trình duyệt có đuôi `#`).
-- Kết quả AI trả về (tóm tắt): Phân tích ảnh và giải thích do thuộc tính `href` đang đặt là giá trị giữ chỗ `#`, hướng dẫn đổi thành `href="login.html"`.
-- Đánh giá: Chính xác và nhanh gọn, bắt trúng lỗi cơ bản của việc liên kết các trang HTML tĩnh.
-- Đã chỉnh sửa gì: Sửa thẻ `<a>` ở file `index.html`.
-- Cách kiểm chứng: Reload lại trang chủ, click nút Đăng nhập và thấy chuyển trang thành công.
-- Tỷ lệ mã AI còn giữ lại (ước lượng): 100% logic.
-- Điều học được: Nhớ thay thế các giá trị link tạm thời (`#`) bằng đường dẫn file thực tế khi phát triển giao diện nhiều trang.
+---
 
-### [AI-05] Hỗ trợ viết mã JavaScript đổ dữ liệu mảng ra trang chủ
-- Ngày / Người dùng: 2026-11-16 / Nguyễn Quốc Hội
-- Công cụ: Gemini
-- Giai đoạn: Lập trình
-- Task / Commit / PR: [TM-01] Trang chủ / `feat (TM-01): trang chu du lieu that bang JS` / PR [Số PR Ngày 6]
-- Mục đích: Thay thế dữ liệu HTML gõ cứng bằng JavaScript để tự động render danh sách Danh mục và 4 sách mới nhất từ CSDL giả lập (mảng dữ liệu).
-- Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "Giờ làm sao, code à", cung cấp ảnh ERD CSDL và mã nguồn HTML tĩnh hiện tại để nhờ AI hướng dẫn cách tích hợp dữ liệu.
-- Kết quả AI trả về (tóm tắt): AI cung cấp đoạn script Vanilla JS sử dụng mảng dữ liệu giả lập, dùng `document.getElementById` và `innerHTML` để chèn động các thẻ `<li>` (danh mục) và `<article>` (sách) vào đúng vị trí. Đồng thời hướng dẫn dọn dẹp các thẻ cứng cũ.
-- Đánh giá: Code chạy chính xác ngay lần đầu, dữ liệu render đúng vị trí, giá tiền được format chuẩn VNĐ.
-- Đã chỉnh sửa gì: Thêm các thuộc tính `id="category-menu"` và `id="latest-books"` vào file `index.html` hiện tại, xóa các phần tử HTML cứng cũ, và chèn thẻ `<script>` vào cuối `<body>`.
-- Cách kiểm chứng: Mở trực tiếp file `index.html` trên trình duyệt, nhấn F5, kiểm tra thấy dữ liệu (4 cuốn sách và menu danh mục) tự động load thành công mà không bị vỡ layout.
-- Tỷ lệ nội dung AI còn giữ lại (ước lượng): 95%
-- Điều học được: Hiểu được quy trình cơ bản để thao tác DOM bằng JavaScript, dùng vòng lặp `forEach` để sinh HTML động thay vì viết tĩnh, tạo tiền đề tốt cho việc ghép API thật (Fetch API) từ Backend sau này.
+# [AI Log] - Buổi 3
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Dựng trang chủ tĩnh trên layout chung (`TM-01`) và tách component thẻ sản phẩm dùng chung.
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Component thẻ sản phẩm & Giao diện Trang chủ):**
+> "Gợi ý cấu trúc Blade partial thẻ sản phẩm (ảnh bìa, tên sách, tác giả, giá, link chi tiết) dùng Bootstrap 5 để tái sử dụng cho nhiều trang, và dựng giao diện trang chủ gồm khối tìm kiếm, danh mục sách, sách nổi bật, sách mới cập nhật hiển thị responsive ở 360px và 1366px."
+
+**Prompt 2 (Cấu hình Route & Quản lý nhánh Git):**
+> "Hướng dẫn cách cập nhật route trang chủ `/` trong `routes/web.php` mà không làm mất các route đăng nhập/đăng ký của nhóm, đồng thời tạo nhánh `feature/TM-01-trang-chu` kế thừa bộ layout đã làm."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về giao diện & Responsive:** AI gợi ý tách file `product-card.blade.php` nhận biến `$book` và chia lưới Bootstrap 5 (`row-cols-1 row-cols-sm-2 row-cols-lg-4`). Đã tự tinh chỉnh lại màu sắc, bo góc, khung placeholder bìa sách khớp với Wireframe 01 và kiểm tra hiển thị thực tế trên trình duyệt ở **360px** (1 cột, không tràn ngang) và **1366px** (4 cột cân đối).
+- **Về Route & Git:** AI hướng dẫn thay thế khối `Route::get('/')` test ban đầu bằng `view('home')` và giữ nguyên toàn bộ các route chức năng phía dưới trong `routes/web.php`; tách nhánh `feature/TM-01-trang-chu` đúng quy trình làm việc nhóm.
+
+## 3. Cách áp dụng vào dự án
+- Tạo component dùng chung `resources/views/partials/product-card.blade.php` để tái sử dụng cho chức năng **TM-02** (Danh sách sách) và **TM-03** (Chi tiết sản phẩm).
+- Hoàn thiện trang chủ `resources/views/home.blade.php` với dữ liệu mẫu và cập nhật `routes/web.php` trên nhánh `feature/TM-01-trang-chu` (commit `feat(TM-01): trang chu du lieu gia`).
+
+---
+
+# [AI Log] - Buổi 4
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Dựng giao diện trang đăng nhập, đăng ký (`TM-04`) theo layout chung và cập nhật trạng thái người dùng trên Header.
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Giao diện Đăng nhập, Đăng ký & Accessibility):**
+> "Dựng giao diện form Đăng nhập và Đăng ký kế thừa layout chung dùng Bootstrap 5, có đầy đủ thuộc tính accessibility (`label`, `autocomplete`), hiển thị thông báo lỗi validate từ server (`@error`, `session`)."
+
+**Prompt 2 (Trạng thái Header & Đồng bộ nhánh Git):**
+> "Hướng dẫn hiển thị tên người dùng và nút đăng xuất trên Header khi đã đăng nhập, đồng thời gộp toàn bộ code giao diện từ nhánh `develop` và các nhánh `feature` sang nhánh `FrontEnd` trên GitHub."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về Form & Validation:** AI gợi ý tích hợp `@csrf`, `old()`, `@error` và các thuộc tính `label for`, `autocomplete`. Đã đối chiếu và giữ nguyên thuộc tính `action` cùng tên các trường `name` của input để khớp hoàn toàn với Controller xử lý của Backend (TV2), sau đó kiểm thử thực tế khi bỏ trống hoặc nhập sai dữ liệu.
+- **Về Header & Git:** AI gợi ý kiểm tra tên hiển thị linh hoạt (`Auth::user()->full_name ?? Auth::user()->name`) trên `header.blade.php` và hướng dẫn lệnh `git merge` để đồng bộ mã nguồn sang nhánh `FrontEnd`.
+
+## 3. Cách áp dụng vào dự án
+- Hoàn thiện giao diện `resources/views/auth/login.blade.php` và `resources/views/auth/register.blade.php` trên nhánh `feature/TM-04-giao-dien` (commit `feat(TM-04): giao dien dang ky dang nhap`).
+- Cập nhật `resources/views/partials/header.blade.php` hiển thị đúng tên người dùng và nút đăng xuất sau khi đăng nhập thành công.
+- Đồng bộ toàn bộ mã nguồn giao diện từ Buổi 1 đến Buổi 4 lên nhánh `FrontEnd` trên GitHub.
+
+---
+
+# [AI Log] - Buổi 5
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Trình bày Wireframe Mốc 1 và dựng khung trang Danh sách & Lọc sách (`TM-02`).
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Giao diện Danh sách & Bộ lọc sản phẩm):**
+> "Dựng khung trang danh sách sách (`TM-02`) dùng Bootstrap 5 gồm cột bộ lọc bên trái (từ khóa, danh mục, khoảng giá, sắp xếp) tự động thu gọn thành nút bấm trên màn hình 360px, lưới hiển thị sách tái sử dụng partial `product-card.blade.php` và thanh phân trang."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về giao diện & Bộ lọc:** AI gợi ý bố cục 2 cột (`col-lg-3` cho sidebar lọc, `col-lg-9` cho lưới sản phẩm) kết hợp `collapse` của Bootstrap trên màn hình nhỏ. Đã kiểm tra thực tế trên trình duyệt tại `http://127.0.0.1:8000/products` ở cả 2 kích thước **360px** và **1366px**, thử lọc theo từ khóa và danh mục hoạt động mượt mà với dữ liệu mẫu.
+
+## 3. Cách áp dụng vào dự án
+- Tạo view `resources/views/products/index.blade.php` tái sử dụng component `partials/product-card.blade.php`.
+- Thêm route `/products` trong `routes/web.php` trên nhánh `feature/TM-02-danh-sach` (commit `feat(TM-02): khung trang danh sach`) và đồng bộ lên nhánh `FrontEnd`.
