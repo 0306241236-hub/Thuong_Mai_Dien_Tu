@@ -21,9 +21,46 @@ class OrderController extends Controller
     /**
      * Hiển thị Form đặt hàng & tóm tắt giỏ hàng
      */
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
+
+        // Nhận product_id từ nút "Đặt mua" (/checkout?product_id=...) và lưu vào cart_items
+        if ($request->filled('product_id')) {
+            $product = DB::table('products')->where('id', $request->product_id)->first();
+
+            if ($product) {
+                $existingItem = DB::table('cart_items')
+                    ->where('user_id', $user->id)
+                    ->where('product_id', $product->id)
+                    ->first();
+
+                if ($existingItem) {
+                    DB::table('cart_items')
+                        ->where('id', $existingItem->id)
+                        ->increment('quantity');
+                } else {
+                    $insertData = [
+                        'user_id'    => $user->id,
+                        'product_id' => $product->id,
+                        'quantity'   => 1,
+                    ];
+
+                    if (Schema::hasColumn('cart_items', 'created_at')) {
+                        $insertData['created_at'] = now();
+                    }
+                    if (Schema::hasColumn('cart_items', 'updated_at')) {
+                        $insertData['updated_at'] = now();
+                    }
+
+                    DB::table('cart_items')->insert($insertData);
+                }
+
+                // Chuyển về URL sạch để tránh F5 bị cộng dồn số lượng
+                return redirect()->to('/checkout');
+            }
+        }
+
         $nameColumn = Schema::hasColumn('products', 'name') ? 'name' : 'title';
 
         $cartItems = DB::table('cart_items')
