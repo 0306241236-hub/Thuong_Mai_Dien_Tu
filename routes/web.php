@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ProductService;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\AuthController;
@@ -10,6 +11,7 @@ use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,48 +40,49 @@ Route::get('/', function () {
     return view('home', compact('categories', 'newBooks', 'categoriesWithBooks'));
 })->name('home');
 
-// Danh sách & lọc sách theo danh mục
-Route::get('/products', function (Illuminate\Http\Request $request) {
-    $categories = Category::all();
-    $query = Product::where('is_active', true);
+Route::get('/products', function (Request $request, ProductService $productService) {
+    $keyword    = $request->input('keyword');
+    $categoryId = $request->filled('category_id') ? (int) $request->input('category_id') : null;
+    $minPrice   = $request->filled('min_price') ? (float) $request->input('min_price') : null;
+    $maxPrice   = $request->filled('max_price') ? (float) $request->input('max_price') : null;
+    $sort       = $request->input('sort', 'newest');
+    $page       = max(1, (int) $request->input('page', 1));
 
-    if ($request->filled('keyword')) {
-        $query->where('name', 'like', '%' . $request->keyword . '%');
-    }
-    if ($request->filled('category')) {
-        $slug = $request->category;
-        $query->whereHas('category', fn($q) => $q->where('slug', $slug));
-    }
+    $books = $productService->search($keyword, $categoryId, $minPrice, $maxPrice, $sort, $page);
+    $categories = Category::withCount(['products' => function ($q) {
+        $q->where('is_active', true);
+    }])->get();
 
-    $books = $query->latest()->get();
-    return view('products.index', compact('categories', 'books'));
+    return view('products.index', compact('books', 'categories'));
 })->name('products.index');
+
+Route::get('/products/{id}', function ($id) {
+    // Lấy thông tin sách đang mở bán kèm danh mục, báo 404 nếu không tồn tại
+    $book = Product::with('category')
+        ->where('is_active', true)
+        ->findOrFail($id);
+
+    // Lấy tối đa 4 cuốn sách cùng danh mục (trừ cuốn hiện tại)
+    $relatedBooks = Product::with('category')
+        ->where('is_active', true)
+        ->where('category_id', $book->category_id)
+        ->where('id', '!=', $book->id)
+        ->latest()
+        ->take(4)
+        ->get();
+
+    return view('products.show', compact('book', 'relatedBooks'));
+})->whereNumber('id')->name('products.show');
 
 // Giao diện & xử lý Đăng ký
 Route::get('/register', function () {
-    return '<form method="POST" action="/register">
-        ' . csrf_field() . '
-        Họ tên: <input type="text" name="full_name" required><br>
-        Email: <input type="email" name="email" required><br>
-        SĐT: <input type="text" name="phone"><br>
-        Địa chỉ: <input type="text" name="address"><br>
-        Mật khẩu: <input type="password" name="password" required><br>
-        Xác nhận MK: <input type="password" name="password_confirmation" required><br>
-        <button type="submit">Đăng ký</button>
-    </form>';
-});
+    return view('auth.register');
+})->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
 // Giao diện & xử lý Đăng nhập
 Route::get('/login', function () {
-    $error = session('errors') ? session('errors')->first('email') : '';
-    return '<p style="color:red;">' . e($error) . '</p>
-    <form method="POST" action="/login">
-        ' . csrf_field() . '
-        Email: <input type="email" name="email" required><br>
-        Mật khẩu: <input type="password" name="password" required><br>
-        <button type="submit">Đăng nhập</button>
-    </form>';
+    return view('auth.login');
 })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
