@@ -56,6 +56,24 @@ Route::get('/products', function (Request $request, ProductService $productServi
     return view('products.index', compact('books', 'categories'));
 })->name('products.index');
 
+Route::get('/products/{id}', function ($id) {
+    // Lấy thông tin sách đang mở bán kèm danh mục, báo 404 nếu không tồn tại
+    $book = Product::with('category')
+        ->where('is_active', true)
+        ->findOrFail($id);
+
+    // Lấy tối đa 4 cuốn sách cùng danh mục (trừ cuốn hiện tại)
+    $relatedBooks = Product::with('category')
+        ->where('is_active', true)
+        ->where('category_id', $book->category_id)
+        ->where('id', '!=', $book->id)
+        ->latest()
+        ->take(4)
+        ->get();
+
+    return view('products.show', compact('book', 'relatedBooks'));
+})->whereNumber('id')->name('products.show');
+
 // Giao diện & xử lý Đăng ký
 Route::get('/register', function () {
     return view('auth.register');
