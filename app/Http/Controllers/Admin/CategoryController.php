@@ -5,16 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Services\CategoryService;
-use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
     public function __construct(protected CategoryService $categoryService) {}
 
-    public function index(Request $request)
+  public function index(Request $request)
     {
-        $categories = $this->categoryService->getAll($request->query('keyword'));
+        $keyword = $request->query('keyword');
+        $keyword = is_string($keyword) ? trim($keyword) : null;
+
+        $categories = $this->categoryService->getAll($keyword);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -25,14 +29,7 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:150|unique:categories,name',
-            'description' => 'nullable|string',
-        ], [
-            'name.required' => 'Vui lòng nhập tên danh mục.',
-            'name.max' => 'Tên danh mục không được vượt quá 150 ký tự.',
-            'name.unique' => 'Tên danh mục này đã tồn tại.',
-        ]);
+        $validated = $this->validateCategory($request);
 
         $this->categoryService->create($validated);
 
@@ -47,14 +44,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:150|unique:categories,name,' . $category->id,
-            'description' => 'nullable|string',
-        ], [
-            'name.required' => 'Vui lòng nhập tên danh mục.',
-            'name.max' => 'Tên danh mục không được vượt quá 150 ký tự.',
-            'name.unique' => 'Tên danh mục này đã tồn tại.',
-        ]);
+        $validated = $this->validateCategory($request, $category->id);
 
         $this->categoryService->update($category, $validated);
 
@@ -72,5 +62,31 @@ class CategoryController extends Controller
             return redirect()->route('admin.categories.index')
                 ->with('error', $e->getMessage());
         }
+    }
+
+    private function validateCategory(Request $request, ?int $categoryId = null): array
+    {
+        if (is_string($request->input('name'))) {
+            $request->merge([
+                'name' => preg_replace('/\s+/', ' ', trim($request->input('name'))),
+            ]);
+        }
+
+        return $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:150',
+                Rule::unique('categories', 'name')->ignore($categoryId),
+            ],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'name.required'      => 'Vui lòng nhập tên danh mục.',
+            'name.string'        => 'Tên danh mục phải là chuỗi ký tự hợp lệ.',
+            'name.max'           => 'Tên danh mục không được vượt quá 150 ký tự.',
+            'name.unique'        => 'Tên danh mục này đã tồn tại.',
+            'description.string' => 'Mô tả danh mục phải là chuỗi ký tự hợp lệ.',
+            'description.max'    => 'Mô tả danh mục không được vượt quá 1000 ký tự.',
+        ]);
     }
 }

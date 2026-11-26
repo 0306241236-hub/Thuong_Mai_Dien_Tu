@@ -26,7 +26,11 @@
 
                 <div class="mb-3">
                     <label for="description" class="form-label fw-semibold">Mô tả</label>
-                    <textarea name="description" id="description" rows="3" class="form-control">{{ old('description', $category->description) }}</textarea>
+                    <textarea name="description" id="description" rows="3"
+                              class="form-control @error('description') is-invalid @enderror">{{ old('description', $category->description) }}</textarea>
+                    @error('description')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="d-flex gap-2">
