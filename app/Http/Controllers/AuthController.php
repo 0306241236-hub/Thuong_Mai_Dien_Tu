@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -18,37 +19,57 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $user = $this->authService->register($request->validated());
+        try {
+            $user = $this->authService->register($request->validated());
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Đăng ký thành công!',
-                'data' => $user
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Đăng ký thành công!',
+                    'data' => $user
+                ], 201);
+            }
+
+            return redirect('/login')->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
+            return back()
+                ->withErrors(['email' => $e->getMessage()])
+                ->withInput();
         }
-
-        return redirect('/login')->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
     }
 
     public function login(LoginRequest $request)
     {
-        $result = $this->authService->login($request->validated());
+        try {
+            $result = $this->authService->login($request->validated());
 
-        $request->session()->regenerate();
+            $request->session()->regenerate();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Đăng nhập thành công!',
-                'data' => $result
-            ], 200);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Đăng nhập thành công!',
+                    'data' => $result
+                ], 200);
+            }
+
+            return redirect()->intended(is_array($result) ? ($result['redirect_url'] ?? '/') : '/');
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $e->getMessage()], 401);
+            }
+
+            return back()
+                ->withErrors(['email' => $e->getMessage()])
+                ->onlyInput('email');
         }
-
-        return redirect()->intended(is_array($result) ? ($result['redirect_url'] ?? '/') : '/');
     }
 
     public function logout(Request $request)
     {
-        $this->authService->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
