@@ -174,3 +174,49 @@ AI đã hỗ trợ sinh khung mã nguồn cho 8 tệp thuộc tính năng Quản
   - Xử lý hiển thị giao diện và đồng bộ các trường dữ liệu (`full_name` ở bảng `users`, `slug` ở bảng `categories`) khi khởi tạo dữ liệu kiểm thử.
 - **Kết quả kiểm thử:** Đã kiểm tra hoạt động ổn định toàn bộ luồng Thêm, Sửa, Đổi trạng thái hiển thị, Upload ảnh và Xóa trên trình duyệt.
 develop
+### [AI-08]
+
+- **Thành viên:** Nguyễn Minh Khang (TV4)
+- **Vai trò:** Thiết kế Cơ sở dữ liệu (CSDL), Migrations & Dữ liệu mẫu (Seeder)
+- **Nhánh Git thực hiện:** `chore/du-lieu-demo`
+
+---
+
+## 1. Thống kê số lượt sử dụng AI
+
+| Giai đoạn | Nội dung công việc chính | Số lượt dùng AI |
+| :--- | :--- | :---: |
+| **Giai đoạn 1** | Phân tích nghiệp vụ, chuẩn hóa lược đồ CSDL 3NF (6 bảng) & thiết kế chỉ mục (Index) | 4 lượt |
+| **Giai đoạn 2** | Viết Migrations, `DatabaseSeeder.php` (5 danh mục, 30 sách, 11 tài khoản, 10 đơn hàng) & sinh ảnh bìa tự động | 5 lượt |
+| **Giai đoạn 3** | Xử lý lỗi kết nối MySQL, đối chiếu dữ liệu phpMyAdmin & soạn thảo tài liệu Chương 3, Mục 5.2 | 4 lượt |
+| **Tổng cộng** | | **13 lượt** |
+
+---
+
+## 2. Nhật ký các lượt sử dụng AI tiêu biểu
+
+1. **Rà soát chuẩn hóa 3NF & tối ưu truy vấn (`migrations`):**
+   - **Mục đích:** Kiểm tra tính toàn vẹn khóa ngoại (`onDelete('cascade')`) giữa 6 bảng (`users`, `categories`, `products`, `cart_items`, `orders`, `order_items`) và đề xuất đánh chỉ mục cho các cột tìm kiếm/lọc thường xuyên (`name`, `category_id`, `is_active`).
+   - **Kết quả:** Hoàn thiện bộ tệp migration đồng bộ, chạy thông suốt lệnh `php artisan migrate:fresh`.
+
+2. **Xây dựng kịch bản dữ liệu mẫu & tạo ảnh bìa tự động (`DatabaseSeeder.php`):**
+   - **Mục đích:** Tạo dữ liệu demo sát thực tế kèm các trường hợp biên để kiểm thử (2 đầu sách hết hàng `stock = 0`, 1 đầu sách tạm ẩn `is_active = false`, 1 tài khoản khách hàng bị khóa `status = 'locked'`, và 10 đơn hàng chia đều 4 trạng thái `pending`, `shipping`, `completed`, `cancelled`).
+   - **Kết quả:** Tích hợp hàm `generateBookCoverImage()` sử dụng thư viện PHP GD để tự động vẽ 30 ảnh bìa (`book-1.jpg` → `book-30.jpg`) phối màu theo từng danh mục vào `storage/app/public/products/`, giúp bất kỳ thành viên nào trong nhóm chạy `php artisan migrate:fresh --seed` cũng có đầy đủ dữ liệu và hình ảnh mà không cần tải thủ công.
+
+3. **Gỡ lỗi môi trường & kiểm chứng dữ liệu (`MySQL / phpMyAdmin`):**
+   - **Mục đích:** Khắc phục lỗi từ chối kết nối `SQLSTATE[HY000] [2002]` khi chạy Seeder trên Windows và đối chiếu toàn bộ bản ghi sau khi nạp.
+   - **Kết quả:** Xác nhận dịch vụ MySQL cổng `3306` hoạt động ổn định, kiểm tra trực tiếp trên phpMyAdmin đủ 5 danh mục, 30 sản phẩm, 11 người dùng, 10 đơn hàng và 18 chi tiết đơn hàng (`order_items`).
+
+4. **Soạn thảo tài liệu kỹ thuật (Chương 3 & Mục 5.2):**
+   - **Mục đích:** Hệ thống hóa phần mô tả công nghệ sử dụng, sơ đồ ERD, từ điển dữ liệu chi tiết từng bảng và các ràng buộc toàn vẹn vào báo cáo chung của nhóm.
+
+---
+
+## 3. Phản tư hiệu quả & Hạn chế của AI
+
+- **Điểm hiệu quả:**
+  - Rút ngắn đáng kể thời gian tạo bộ dữ liệu mẫu tiếng Việt đa dạng, có tính logic cao về giá bán, số lượng tồn kho và tổng tiền từng đơn hàng.
+  - Giải pháp tự động vẽ ảnh bìa bằng PHP GD do AI đề xuất giúp giữ thư mục mã nguồn gọn nhẹ (không phải commit hàng chục tệp ảnh nặng lên Git) nhưng vẫn đảm bảo giao diện web hiển thị đầy đủ hình ảnh.
+- **Hạn chế & Cách khắc phục:**
+  - Ở một số gợi ý ban đầu, AI đặt tên cột chưa trùng khớp với thiết kế thực tế của nhóm (ví dụ dùng `title` thay vì `name`, `total_price` thay vì `total_amount`, hoặc thiếu cột `is_active` được bổ sung ở migration sau).
+  - **Biện pháp kiểm soát:** Luôn mở trực tiếp toàn bộ tệp trong `database/migrations/` để đối chiếu từng tên cột và kiểu dữ liệu trước khi chạy `migrate:fresh --seed`, đồng thời kiểm tra chéo kết quả thực tế trên phpMyAdmin và giao diện web.
