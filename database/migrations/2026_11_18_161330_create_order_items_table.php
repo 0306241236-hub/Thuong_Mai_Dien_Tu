@@ -8,14 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
-            $table->unsignedInteger('quantity');
-            $table->decimal('price_at_purchase', 12, 2);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('order_items')) {
+            Schema::create('order_items', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+                $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+                $table->unsignedInteger('quantity');
+                $table->decimal('price_at_purchase', 12, 2);
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
