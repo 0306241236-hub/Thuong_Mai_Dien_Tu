@@ -125,3 +125,27 @@
 - Hoàn thiện chức năng **TM-01** (Trang chủ lấy dữ liệu thật từ CSDL) trên `routes/web.php`, `resources/views/home.blade.php` và `resources/views/partials/product-card.blade.php`.
 - Đồng bộ lại giao diện đăng ký (`TM-04`) và danh sách sản phẩm (`TM-02`) giữa nhánh `FrontEnd` và `feature/TM-01-trang-chu`.
 - Đẩy mã nguồn kèm trailer `AI-assisted: Gemini [AI-06]` lên nhánh `feature/TM-01-trang-chu` và mở Pull Request chờ TV4 review.
+
+---
+
+# [AI Log] - Buổi 7
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Xây dựng chức năng tìm kiếm, lọc, sắp xếp và phân trang phía server (TM-02), đồng bộ giao diện đăng nhập/đăng ký (TM-04) và đẩy mã nguồn lên nhánh `feature/TM-02-tim-kiem`.
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Xây dựng ProductService::search & Phân trang phía server):**
+> "Viết hàm ProductService::search(keyword, categoryId, minPrice, maxPrice, sort, page) trong Laravel phân trang 12 sách/trang, sử dụng truy vấn tham số hóa, tận dụng chỉ mục trên bảng products và giữ nguyên tham số bộ lọc trên URL."
+
+**Prompt 2 (Giao diện bộ lọc & Sắp xếp trang danh sách sách):**
+> "Cập nhật resources/views/products/index.blade.php với bộ lọc từ khóa, danh mục (kèm số lượng sách), khoảng giá, sắp xếp (mới nhất, giá tăng/giảm) và hiển thị thông báo khi không tìm thấy kết quả."
+
+**Prompt 3 (Đồng bộ giao diện Đăng nhập/Đăng ký & Xử lý lỗi namespace):**
+> "Sửa lỗi TypeError thiếu use LengthAwarePaginator trong ProductService.php và đồng bộ lại giao diện Bootstrap 5 cho trang /login và /register trong routes/web.php."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về truy vấn tìm kiếm & lọc (TM-02):** AI sinh hàm `search()` sử dụng Eloquent Query Builder kết hợp tham số hóa (`LIKE` với biến ràng buộc) để chống SQL Injection, lọc theo các cột có chỉ mục (`is_active`, `category_id`, `price`) và dùng `->paginate(12)->withQueryString()`. Đã kiểm thử thực tế trên trình duyệt tại `/products` với các bộ lọc từ khóa, khoảng giá và sắp xếp hoạt động chính xác, giữ nguyên tham số trên URL.
+- **Về xử lý lỗi & giao diện:** Đã bổ sung `use Illuminate\Contracts\Pagination\LengthAwarePaginator;` để khắc phục lỗi `TypeError` và cập nhật `routes/web.php` trả về `view('auth.login')`, `view('auth.register')` giúp toàn bộ hệ thống đồng nhất giao diện Bootstrap 5.
+
+## 3. Cách áp dụng vào dự án
+- Hoàn thiện chức năng **TM-02** trên `app/Services/ProductService.php`, `routes/web.php` và `resources/views/products/index.blade.php`.
+- Đồng bộ đầy đủ giao diện `TM-01`, `TM-02`, `TM-04` sang nhánh `FrontEnd` và đẩy mã nguồn kèm trailer `AI-assisted: Gemini [AI-07]` lên nhánh `feature/TM-02-tim-kiem`.

@@ -1,64 +1,68 @@
 @extends('layouts.app')
 
-@section('title', 'Đăng nhập - Sách Sinh Viên')
+@section('title', 'Đăng nhập - Cửa hàng sách')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-12 col-sm-10 col-md-6 col-lg-5">
-        <div class="border rounded-2 p-4 p-md-5 bg-white">
-            <h1 class="fw-bold fs-3 mb-1">Đăng nhập</h1>
-            <p class="text-secondary small mb-4">Đăng nhập để quản lý giỏ hàng và theo dõi đơn đặt sách.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-9 col-md-6 col-lg-4">
+            <div class="card border rounded-3 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h1 class="h4 fw-bold mb-1">Đăng nhập</h1>
+                        <p class="text-secondary small mb-0">Chào mừng bạn quay trở lại</p>
+                    </div>
 
-            {{-- Thông báo lỗi chung hoặc đăng ký thành công --}}
-            @if (session('success'))
-                <div class="alert alert-success small py-2">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger small py-2">{{ session('error') }}</div>
-            @endif
+                    @if (session('success'))
+                        <div class="alert alert-success small py-2">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
-            <form action="{{ url('/login') }}" method="POST">
-                @csrf
+                    @if (session('error'))
+                        <div class="alert alert-danger small py-2">
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
-                <!-- Email -->
-                <div class="mb-3">
-                    <label for="email" class="form-label fw-medium small">Email <span class="text-danger">*</span></label>
-                    <input type="email"
-                           id="email"
-                           name="email"
-                           value="{{ old('email') }}"
-                           autocomplete="email"
-                           required
-                           class="form-control @error('email') is-invalid @enderror"
-                           placeholder="sinhvien@example.com">
-                    @error('email')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <form method="POST" action="{{ url('/login') }}">
+                        @csrf
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label small fw-semibold">Email</label>
+                            <input type="email" id="email" name="email"
+                                   class="form-control @error('email') is-invalid @enderror"
+                                   value="{{ old('email') }}" placeholder="name@example.com" required autofocus>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label small fw-semibold">Mật khẩu</label>
+                            <input type="password" id="password" name="password"
+                                   class="form-control @error('password') is-invalid @enderror"
+                                   placeholder="Nhập mật khẩu" required>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Nút đăng nhập -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-dark fw-semibold">Đăng nhập</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <p class="text-center small text-secondary mb-0">
+                        Chưa có tài khoản?
+                        <a href="{{ url('/register') }}" class="text-dark fw-semibold text-decoration-underline">Đăng ký ngay</a>
+                    </p>
                 </div>
-
-                <!-- Mật khẩu -->
-                <div class="mb-4">
-                    <label for="password" class="form-label fw-medium small">Mật khẩu <span class="text-danger">*</span></label>
-                    <input type="password"
-                           id="password"
-                           name="password"
-                           autocomplete="current-password"
-                           required
-                           class="form-control @error('password') is-invalid @enderror"
-                           placeholder="Nhập mật khẩu">
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <button type="submit" class="btn btn-wireframe w-100 py-2 fw-medium">
-                    Đăng nhập
-                </button>
-            </form>
-
-            <div class="text-center small text-secondary mt-4 pt-3 border-top">
-                Chưa có tài khoản?
-                <a href="{{ url('/register') }}" class="text-dark fw-semibold text-decoration-underline">Đăng ký ngay</a>
             </div>
         </div>
     </div>
