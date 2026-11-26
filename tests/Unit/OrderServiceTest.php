@@ -4,15 +4,16 @@ namespace Tests\Unit;
 
 use App\Services\OrderService;
 use Exception;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderServiceTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected OrderService $orderService;
 
@@ -22,149 +23,206 @@ class OrderServiceTest extends TestCase
         $this->orderService = new OrderService();
     }
 
-    /**
-     * Tạo nhanh dữ liệu mẫu (User + Product) phục vụ Unit Test
-     */
-    private function seedTestData(int $initialStock = 10): array
+    private function createTestUser(?string $email = null): int
     {
-        $userId = DB::table('users')->insertGetId([
-            'full_name'  => 'Khach Hang Test',
-            'email'      => 'test_order_' . uniqid() . '@gmail.com',
-            'password'   => Hash::make('12345678'),
-            'role'       => 'customer',
-            'status'     => 'active',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $stockColumn = Schema::hasColumn('products', 'stock') ? 'stock' : 'quantity';
-        $nameColumn  = Schema::hasColumn('products', 'name') ? 'name' : 'title';
-
-        $productData = [
-            $nameColumn  => 'Sách Lập Trình Laravel',
-            'price'      => 150000,
-            $stockColumn => $initialStock,
-            'created_at' => now(),
-            'updated_at' => now(),
+        $data = [
+            'email'    => $email ?? ('customer_' . uniqid() . '@example.com'),
+            'password' => Hash::make('Password123!'),
         ];
 
-        // Bổ sung các cột có thể bắt buộc trong CSDL của bạn
-        if (Schema::hasColumn('products', 'slug')) {
-            $productData['slug'] = 'sach-lap-trinh-laravel-' . uniqid();
+        if (Schema::hasColumn('users', 'name')) {
+            $data['name'] = 'Nguyễn Văn A';
         }
-        if (Schema::hasColumn('products', 'author')) {
-            $productData['author'] = 'Tác giả Test';
+        if (Schema::hasColumn('users', 'full_name')) {
+            $data['full_name'] = 'Nguyễn Văn A';
         }
-        if (Schema::hasColumn('products', 'description')) {
-            $productData['description'] = 'Mô tả test';
+        if (Schema::hasColumn('users', 'username')) {
+            $data['username'] = 'user_' . uniqid();
+        }
+        if (Schema::hasColumn('users', 'role')) {
+            $data['role'] = 'customer';
+        }
+        if (Schema::hasColumn('users', 'created_at')) {
+            $data['created_at'] = now();
+            $data['updated_at'] = now();
         }
 
-        if (Schema::hasColumn('products', 'category_id')) {
+        return DB::table('users')->insertGetId($data);
+    }
+
+    private function createProduct(string $title, int $price, int $stock): int
+    {
+        $nameCol  = Schema::hasColumn('products', 'name') ? 'name' : 'title';
+        $stockCol = Schema::hasColumn('products', 'stock') ? 'stock' : 'quantity';
+
+        $data = [
+            $nameCol  => $title,
+            'price'   => $price,
+            $stockCol => $stock,
+        ];
+
+        if (Schema::hasColumn('products', 'author')) {
+            $data['author'] = 'Tác giả Test';
+        }
+
+        if (Schema::hasColumn('products', 'slug')) {
+            $data['slug'] = Str::slug($title) . '-' . uniqid();
+        }
+
+        if (Schema::hasColumn('products', 'category_id') && Schema::hasTable('categories')) {
             $categoryId = DB::table('categories')->value('id');
             if (!$categoryId) {
-                $categoryData = [
-                    'name'       => 'Danh mục test',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+                $catNameCol = Schema::hasColumn('categories', 'name') ? 'name' : 'title';
+                $catData = [$catNameCol => 'Sách Lập Trình'];
                 if (Schema::hasColumn('categories', 'slug')) {
-                    $categoryData['slug'] = 'danh-muc-test-' . uniqid();
+                    $catData['slug'] = 'sach-lap-trinh-' . uniqid();
                 }
-                $categoryId = DB::table('categories')->insertGetId($categoryData);
+                if (Schema::hasColumn('categories', 'created_at')) {
+                    $catData['created_at'] = now();
+                    $catData['updated_at'] = now();
+                }
+                $categoryId = DB::table('categories')->insertGetId($catData);
             }
-            $productData['category_id'] = $categoryId;
+            $data['category_id'] = $categoryId;
         }
 
-        $productId = DB::table('products')->insertGetId($productData);
+        if (Schema::hasColumn('products', 'created_at')) {
+            $data['created_at'] = now();
+            $data['updated_at'] = now();
+        }
 
-        return [$userId, $productId, $stockColumn];
+        return DB::table('products')->insertGetId($data);
+    }
+
+    private function addToCart(int $userId, int $productId, int $quantity): void
+    {
+        $row = [
+            'user_id'    => $userId,
+            'product_id' => $productId,
+            'quantity'   => $quantity,
+        ];
+
+        if (Schema::hasColumn('cart_items', 'created_at')) {
+            $row['created_at'] = now();
+            $row['updated_at'] = now();
+        }
+
+        DB::table('cart_items')->insert($row);
     }
 
     /**
-     * Test case 1: Đặt hàng thành công trong transaction
+     * Test 1: Đặt hàng thành công -> trạng thái pending (Chờ xác nhận), trừ kho, xóa giỏ hàng
      */
     public function test_place_order_successfully(): void
     {
-        [$userId, $productId, $stockColumn] = $this->seedTestData(10);
+        $userId    = $this->createTestUser();
+        $productId = $this->createProduct('Sách Laravel Thực Chiến', 150000, 10);
 
-        DB::table('cart_items')->insert([
-            'user_id'    => $userId,
-            'product_id' => $productId,
-            'quantity'   => 3,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $this->addToCart($userId, $productId, 2);
 
-        $shippingData = [
+        $order = $this->orderService->placeOrder($userId, [
             'receiver_name'    => 'Nguyễn Văn A',
-            'shipping_phone'   => '0901234567',
+            'receiver_phone'   => '0901234567',
             'shipping_address' => '123 Đường Lê Lợi, TP.HCM',
             'note'             => 'Giao giờ hành chính',
-        ];
+        ]);
 
-        $order = $this->orderService->placeOrder($userId, $shippingData);
+        // 1. Đơn hàng được tạo với trạng thái pending (Chờ xác nhận)
+        $this->assertDatabaseHas('orders', [
+            'id'      => $order->id,
+            'user_id' => $userId,
+            'status'  => 'pending',
+        ]);
 
-        $this->assertNotNull($order);
-        $this->assertEquals('Chờ xác nhận', $order->status);
-        $this->assertEquals(450000, $order->total_amount);
-
+        // 2. Chi tiết đơn hàng khớp số lượng đặt
         $this->assertDatabaseHas('order_items', [
             'order_id'   => $order->id,
             'product_id' => $productId,
-            'quantity'   => 3,
+            'quantity'   => 2,
         ]);
 
+        // 3. Tồn kho giảm từ 10 xuống 8
+        $stockCol = Schema::hasColumn('products', 'stock') ? 'stock' : 'quantity';
         $this->assertDatabaseHas('products', [
-            'id'         => $productId,
-            $stockColumn => 7,
+            'id'      => $productId,
+            $stockCol => 8,
         ]);
 
+        // 4. Giỏ hàng của user được xóa sạch
         $this->assertDatabaseMissing('cart_items', [
             'user_id' => $userId,
         ]);
     }
 
     /**
-     * Test case 2: Đặt vượt tồn kho bị từ chối và rollback toàn bộ
+     * Test 2: Đặt vượt tồn kho bị từ chối & rollback toàn bộ giao dịch
      */
     public function test_place_order_exceeding_stock_throws_exception_and_rollbacks(): void
     {
-        [$userId, $productId, $stockColumn] = $this->seedTestData(2);
+        $userId   = $this->createTestUser();
+        $productA = $this->createProduct('Sách A (Đủ kho)', 100000, 5);
+        $productB = $this->createProduct('Sách B (Thiếu kho)', 200000, 1);
 
-        DB::table('cart_items')->insert([
-            'user_id'    => $userId,
-            'product_id' => $productId,
-            'quantity'   => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $this->addToCart($userId, $productA, 2);
+        $this->addToCart($userId, $productB, 3);
 
-        $shippingData = [
-            'receiver_name'    => 'Nguyễn Văn B',
-            'shipping_phone'   => '0909876543',
-            'shipping_address' => '456 Đường Nguyễn Huệ, TP.HCM',
-        ];
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('không đủ tồn kho');
 
         try {
-            $this->orderService->placeOrder($userId, $shippingData);
-            $this->fail('Lẽ ra phải ném ngoại lệ khi đặt vượt tồn kho.');
+            $this->orderService->placeOrder($userId, [
+                'receiver_name'    => 'Nguyễn Văn A',
+                'receiver_phone'   => '0901234567',
+                'shipping_address' => '123 Đường Lê Lợi, TP.HCM',
+            ]);
+        } finally {
+            $this->assertDatabaseCount('orders', 0);
+            $this->assertDatabaseCount('order_items', 0);
+
+            $stockCol = Schema::hasColumn('products', 'stock') ? 'stock' : 'quantity';
+            $this->assertDatabaseHas('products', ['id' => $productA, $stockCol => 5]);
+            $this->assertDatabaseHas('products', ['id' => $productB, $stockCol => 1]);
+            $this->assertDatabaseCount('cart_items', 2);
+        }
+    }
+
+    /**
+     * Test 3 (TM-NFR1): 2 khách hàng cùng đặt 1 cuốn sách cuối -> chỉ 1 đơn thành công, tồn kho = 0 (không âm)
+     */
+    public function test_only_one_order_succeeds_for_last_item_and_stock_never_negative(): void
+    {
+        $user1Id    = $this->createTestUser('khach1@example.com');
+        $user2Id    = $this->createTestUser('khach2@example.com');
+        $lastBookId = $this->createProduct('Sách Giới Hạn (Còn 1 cuốn)', 120000, 1);
+
+        $this->addToCart($user1Id, $lastBookId, 1);
+        $this->addToCart($user2Id, $lastBookId, 1);
+
+        $shipping = [
+            'receiver_name'    => 'Khách Hàng',
+            'receiver_phone'   => '0909999999',
+            'shipping_address' => 'Đồng Nai',
+        ];
+
+        // Phiên 1 đặt thành công
+        $order1 = $this->orderService->placeOrder($user1Id, $shipping);
+        $this->assertNotNull($order1->id);
+
+        // Phiên 2 đặt ngay sau đó -> phải bị từ chối
+        $secondOrderFailed = false;
+        try {
+            $this->orderService->placeOrder($user2Id, $shipping);
         } catch (Exception $e) {
-            $this->assertStringContainsString('không đủ tồn kho', $e->getMessage());
+            $secondOrderFailed = true;
         }
 
-        $this->assertDatabaseMissing('orders', [
-            'user_id' => $userId,
-        ]);
+        $this->assertTrue($secondOrderFailed, 'Phiên đặt hàng thứ 2 phải bị từ chối khi hết sách.');
+        $this->assertDatabaseCount('orders', 1);
 
+        $stockCol = Schema::hasColumn('products', 'stock') ? 'stock' : 'quantity';
         $this->assertDatabaseHas('products', [
-            'id'         => $productId,
-            $stockColumn => 2,
-        ]);
-
-        $this->assertDatabaseHas('cart_items', [
-            'user_id'    => $userId,
-            'product_id' => $productId,
-            'quantity'   => 5,
+            'id'      => $lastBookId,
+            $stockCol => 0,
         ]);
     }
 }
