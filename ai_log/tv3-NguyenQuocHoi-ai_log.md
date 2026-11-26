@@ -82,3 +82,20 @@
 - Hoàn thiện giao diện `resources/views/auth/login.blade.php` và `resources/views/auth/register.blade.php` trên nhánh `feature/TM-04-giao-dien` (commit `feat(TM-04): giao dien dang ky dang nhap`).
 - Cập nhật `resources/views/partials/header.blade.php` hiển thị đúng tên người dùng và nút đăng xuất sau khi đăng nhập thành công.
 - Đồng bộ toàn bộ mã nguồn giao diện từ Buổi 1 đến Buổi 4 lên nhánh `FrontEnd` trên GitHub.
+
+---
+
+# [AI Log] - Buổi 5
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Trình bày Wireframe Mốc 1 và dựng khung trang Danh sách & Lọc sách (`TM-02`).
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Giao diện Danh sách & Bộ lọc sản phẩm):**
+> "Dựng khung trang danh sách sách (`TM-02`) dùng Bootstrap 5 gồm cột bộ lọc bên trái (từ khóa, danh mục, khoảng giá, sắp xếp) tự động thu gọn thành nút bấm trên màn hình 360px, lưới hiển thị sách tái sử dụng partial `product-card.blade.php` và thanh phân trang."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về giao diện & Bộ lọc:** AI gợi ý bố cục 2 cột (`col-lg-3` cho sidebar lọc, `col-lg-9` cho lưới sản phẩm) kết hợp `collapse` của Bootstrap trên màn hình nhỏ. Đã kiểm tra thực tế trên trình duyệt tại `http://127.0.0.1:8000/products` ở cả 2 kích thước **360px** và **1366px**, thử lọc theo từ khóa và danh mục hoạt động mượt mà với dữ liệu mẫu.
+
+## 3. Cách áp dụng vào dự án
+- Tạo view `resources/views/products/index.blade.php` tái sử dụng component `partials/product-card.blade.php`.
+- Thêm route `/products` trong `routes/web.php` trên nhánh `feature/TM-02-danh-sach` (commit `feat(TM-02): khung trang danh sach`) và đồng bộ lên nhánh `FrontEnd`.

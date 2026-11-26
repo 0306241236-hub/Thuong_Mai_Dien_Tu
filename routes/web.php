@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 /*
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\DB;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+// Trang chủ hiển thị trạng thái đăng nhập, nút vào Admin và nút Đăng xuất
+
 Route::get('/', function () {
     $categories = [
         ['name' => 'Công nghệ thông tin', 'slug' => 'cntt', 'count' => 24],
@@ -82,6 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/success/{order}', [OrderController::class, 'success'])->name('checkout.success');
 });
 
+// Kiểm tra kết nối CSDL
 Route::get('/test-db', function () {
     try {
         DB::connection()->getPdo();
@@ -90,6 +95,7 @@ Route::get('/test-db', function () {
         return 'Lỗi kết nối CSDL: ' . $e->getMessage();
     }
 });
+
 // Trang tổng quan Quản trị (Admin)
 Route::get('/admin', function () {
     return '
@@ -128,7 +134,50 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
+
     });
 Route::get('/layout-mau', function () {
     return view('sample');
+});
+
+
+// === FRONTEND - TV3 ===
+Route::get('/products', function (\Illuminate\Http\Request $request) {
+    $categories = [
+        ['name' => 'Công nghệ thông tin', 'slug' => 'cntt'],
+        ['name' => 'Kinh tế', 'slug' => 'kinh-te'],
+        ['name' => 'Toán học', 'slug' => 'toan-hoc'],
+        ['name' => 'Ngoại ngữ', 'slug' => 'ngoai-ngu'],
+        ['name' => 'Kỹ năng', 'slug' => 'ky-nang'],
+    ];
+
+    $allBooks = [
+        ['id' => 1, 'title' => 'Lập trình C cơ bản', 'author' => 'Nguyễn Văn An', 'price' => 85000, 'category' => 'cntt'],
+        ['id' => 2, 'title' => 'Kinh tế vi mô', 'author' => 'Trần Minh Hà', 'price' => 120000, 'category' => 'kinh-te'],
+        ['id' => 3, 'title' => 'Toán cao cấp 1', 'author' => 'Lê Thị Mai', 'price' => 95000, 'category' => 'toan-hoc'],
+        ['id' => 4, 'title' => 'Tiếng Anh học thuật', 'author' => 'Phạm Thu Trang', 'price' => 110000, 'category' => 'ngoai-ngu'],
+        ['id' => 5, 'title' => 'Cấu trúc dữ liệu và giải thuật', 'author' => 'Hoàng Đức Minh', 'price' => 135000, 'category' => 'cntt'],
+        ['id' => 6, 'title' => 'Kỹ năng học đại học', 'author' => 'Võ Thanh Tùng', 'price' => 65000, 'category' => 'ky-nang'],
+        ['id' => 7, 'title' => 'Xác suất thống kê', 'author' => 'Đặng Quốc Bảo', 'price' => 90000, 'category' => 'toan-hoc'],
+        ['id' => 8, 'title' => 'Nguyên lý kế toán', 'author' => 'Bùi Thị Lan', 'price' => 105000, 'category' => 'kinh-te'],
+        ['id' => 9, 'title' => 'Cơ sở dữ liệu SQL', 'author' => 'Ngô Quang Khải', 'price' => 115000, 'category' => 'cntt'],
+    ];
+
+    $books = array_filter($allBooks, function ($book) use ($request) {
+        if ($request->filled('keyword') && stripos($book['title'], $request->keyword) === false) {
+            return false;
+        }
+        if ($request->filled('category') && $book['category'] !== $request->category) {
+            return false;
+        }
+        if ($request->filled('min_price') && $book['price'] < (int) $request->min_price) {
+            return false;
+        }
+        if ($request->filled('max_price') && $book['price'] > (int) $request->max_price) {
+            return false;
+        }
+        return true;
+    });
+
+    return view('products.index', compact('categories', 'books'));
 });
