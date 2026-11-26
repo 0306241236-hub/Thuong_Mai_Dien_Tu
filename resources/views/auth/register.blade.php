@@ -24,19 +24,19 @@
 
                 <!-- Họ và tên -->
                 <div class="mb-3">
-                    <label for="name" class="form-label fw-medium small">Họ và tên <span class="text-danger">*</span></label>
+                    <label for="full_name" class="form-label fw-medium small">Họ và tên <span class="text-danger">*</span></label>
                     <input type="text"
-                           id="name"
-                           name="name"
-                           value="{{ old('name') }}"
-                           autocomplete="name"
-                           required
-                           class="form-control @error('name') is-invalid @enderror"
-                           placeholder="Nguyễn Văn A">
-                    @error('name')
+                            id="full_name"
+                            name="full_name"
+                            value="{{ old('full_name') }}"
+                            class="form-control @error('full_name') is-invalid @enderror"
+                            placeholder="Nguyễn Văn A"
+                            required>
+                    @error('full_name')
                         <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                     @enderror
                 </div>
+                
 
                 <!-- Email -->
                 <div class="mb-3">
