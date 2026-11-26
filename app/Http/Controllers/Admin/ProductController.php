@@ -15,13 +15,17 @@ class ProductController extends Controller
     {
     }
 
-    public function index()
+   public function index(Request $request)
     {
-        $products = $this->productService->getPaginatedProducts(10);
+        $filters = [
+            'keyword'     => is_string($request->query('keyword')) ? trim($request->query('keyword')) : null,
+            'category_id' => is_scalar($request->query('category_id')) ? $request->query('category_id') : null,
+        ];
+        $products = $this->productService->getPaginatedProducts($filters, 10);
+        $categories = Category::orderBy('name')->get();
 
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'categories', 'filters'));
     }
-
     public function create()
     {
         $categories = Category::orderBy('name')->get();
@@ -82,8 +86,8 @@ class ProductController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'author'      => ['required', 'string', 'max:150'],
             'publisher'   => ['nullable', 'string', 'max:150'],
-            'price'       => ['required', 'numeric', 'min:0'],
-            'stock'       => ['required', 'integer', 'min:0'],
+            'price'       => ['required', 'numeric', 'gt:0', 'max:999999999'],
+            'stock'       => ['required', 'integer', 'min:0', 'max:1000000'],
             'description' => ['nullable', 'string'],
             'is_active'   => ['nullable', 'boolean'],
             'image'       => [
@@ -99,6 +103,12 @@ class ProductController extends Controller
             'author.required'      => 'Tên tác giả không được để trống.',
             'price.required'       => 'Giá bán không được để trống.',
             'stock.required'       => 'Số lượng tồn kho không được để trống.',
+            'price.numeric'        => 'Giá bán phải là định dạng số.',
+            'price.gt'             => 'Giá bán sản phẩm phải lớn hơn 0.',
+            'price.max'            => 'Giá bán sản phẩm không được vượt quá 999.999.999 đ.',
+            'stock.integer'        => 'Số lượng tồn kho phải là số nguyên.',
+            'stock.min'            => 'Số lượng tồn kho không được nhỏ hơn 0.',
+            'stock.max'            => 'Số lượng tồn kho không được vượt quá 1.000.000.',
             'image.mimes'          => 'Ảnh bìa chỉ chấp nhận định dạng JPG hoặc PNG.',
             'image.mimetypes'      => 'Nội dung tệp tải lên không phải ảnh JPG hoặc PNG hợp lệ.',
             'image.max'            => 'Dung lượng ảnh bìa không được vượt quá 2MB.',

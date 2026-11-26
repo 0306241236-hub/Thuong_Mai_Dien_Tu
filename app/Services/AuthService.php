@@ -2,11 +2,18 @@
 
 namespace App\Services;
 
+ backend
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+=======
+use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+ develop
 
 class AuthService
 {
@@ -19,6 +26,7 @@ class AuthService
             throw new Exception('Email đã được sử dụng.');
         }
 
+ backend
         $userData = [
             'name'     => $data['name'],
             'email'    => $data['email'],
@@ -30,6 +38,15 @@ class AuthService
         }
 
         return User::create($userData);
+
+    public function register(array $data)
+    {
+        $data['password'] = Hash::make($data['password']);
+        $data['role'] = 'customer';
+        $data['status'] = 'active';
+
+        return $this->userRepository->create($data);
+ develop
     }
 
     /**
@@ -78,6 +95,11 @@ class AuthService
     /**
      * Đăng xuất (phòng trường hợp AuthController gọi qua AuthService)
      */
+    public function logout(): void
+    {
+        Auth::logout();
+    }
+
     public function logout(): void
     {
         Auth::logout();

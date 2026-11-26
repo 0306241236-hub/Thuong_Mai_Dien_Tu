@@ -5,12 +5,17 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         $now = now();
+
+        // Đảm bảo thư mục lưu ảnh bìa sản phẩm tồn tại trong storage/app/public/products
+        Storage::disk('public')->makeDirectory('products');
 
         // 1. Seed 5 danh mục (categories)
         $categories = [
@@ -22,7 +27,7 @@ class DatabaseSeeder extends Seeder
         ];
         DB::table('categories')->insert($categories);
 
-        // 2. Seed 30 cuốn sách (products) - 6 cuốn/danh mục, có 2 cuốn stock = 0 để test hết hàng
+        // 2. Seed 30 cuốn sách (products) - 6 cuốn/danh mục, có 2 cuốn stock = 0 và 1 cuốn ẩn để test demo
         $books = [
             // Danh mục 1: Văn học
             ['category_id' => 1, 'name' => 'Nhà Giả Kim', 'author' => 'Paulo Coelho', 'publisher' => 'NXB Hội Nhà Văn', 'price' => 79000, 'stock' => 45, 'description' => 'Hành trình theo đuổi vận mệnh và lắng nghe trái tim của chàng chăn cừu Santiago.'],
@@ -67,10 +72,17 @@ class DatabaseSeeder extends Seeder
 
         $productsInsert = [];
         foreach ($books as $index => $book) {
+            $id = $index + 1;
+            $imagePath = "products/book-{$id}.jpg";
+
+            // Tạo sẵn ảnh bìa sắc nét vào storage/app/public/products/
+            $this->generateBookCoverImage($imagePath, $book['name'], $book['author'], $book['category_id']);
+
             $productsInsert[] = array_merge($book, [
-                'id' => $index + 1,
-                'image_url' => 'images/books/book-' . ($index + 1) . '.jpg',
-                'created_at' => $now,
+                'id' => $id,
+                'image_url' => $imagePath,
+                'is_active' => ($id === 30) ? false : true,
+                'created_at' => $now->copy()->subDays(30 - $id),
                 'updated_at' => $now,
             ]);
         }
@@ -117,20 +129,21 @@ class DatabaseSeeder extends Seeder
 
         // 4. Seed 10 đơn hàng (orders) kèm chi tiết (order_items) chia đều 4 trạng thái
         $sampleOrders = [
-            ['user_id' => 2, 'status' => 'completed', 'payment_method' => 'COD', 'items' => [[1, 2], [7, 1]]],
-            ['user_id' => 3, 'status' => 'completed', 'payment_method' => 'BANKING', 'items' => [[13, 1], [14, 1]]],
-            ['user_id' => 4, 'status' => 'completed', 'payment_method' => 'COD', 'items' => [[19, 1], [20, 1]]],
-            ['user_id' => 5, 'status' => 'shipping', 'payment_method' => 'COD', 'items' => [[2, 2], [25, 1]]],
-            ['user_id' => 6, 'status' => 'shipping', 'payment_method' => 'BANKING', 'items' => [[8, 1], [15, 2]]],
-            ['user_id' => 7, 'status' => 'pending', 'payment_method' => 'COD', 'items' => [[3, 1], [4, 1]]],
-            ['user_id' => 8, 'status' => 'pending', 'payment_method' => 'COD', 'items' => [[21, 1], [26, 2]]],
-            ['user_id' => 9, 'status' => 'pending', 'payment_method' => 'BANKING', 'items' => [[10, 1]]],
-            ['user_id' => 10, 'status' => 'cancelled', 'payment_method' => 'COD', 'items' => [[5, 1], [16, 1]]],
-            ['user_id' => 2, 'status' => 'cancelled', 'payment_method' => 'COD', 'items' => [[28, 1]]],
+            ['user_id' => 2, 'status' => 'completed', 'payment_method' => 'COD', 'days_ago' => 7, 'items' => [[1, 2], [7, 1]]],
+            ['user_id' => 3, 'status' => 'completed', 'payment_method' => 'BANKING', 'days_ago' => 6, 'items' => [[13, 1], [14, 1]]],
+            ['user_id' => 4, 'status' => 'completed', 'payment_method' => 'COD', 'days_ago' => 5, 'items' => [[19, 1], [20, 1]]],
+            ['user_id' => 5, 'status' => 'shipping', 'payment_method' => 'COD', 'days_ago' => 3, 'items' => [[2, 2], [25, 1]]],
+            ['user_id' => 6, 'status' => 'shipping', 'payment_method' => 'BANKING', 'days_ago' => 2, 'items' => [[8, 1], [15, 2]]],
+            ['user_id' => 7, 'status' => 'pending', 'payment_method' => 'COD', 'days_ago' => 1, 'items' => [[3, 1], [4, 1]]],
+            ['user_id' => 8, 'status' => 'pending', 'payment_method' => 'COD', 'days_ago' => 0, 'items' => [[21, 1], [26, 2]]],
+            ['user_id' => 9, 'status' => 'pending', 'payment_method' => 'BANKING', 'days_ago' => 0, 'items' => [[10, 1]]],
+            ['user_id' => 10, 'status' => 'cancelled', 'payment_method' => 'COD', 'days_ago' => 4, 'items' => [[5, 1], [16, 1]]],
+            ['user_id' => 2, 'status' => 'cancelled', 'payment_method' => 'COD', 'days_ago' => 2, 'items' => [[28, 1]]],
         ];
 
         foreach ($sampleOrders as $orderIdx => $orderData) {
             $user = $users[$orderData['user_id'] - 1];
+            $orderTime = $now->copy()->subDays($orderData['days_ago']);
             $totalAmount = 0;
             $orderItemsRows = [];
 
@@ -142,8 +155,8 @@ class DatabaseSeeder extends Seeder
                     'product_id' => $productId,
                     'quantity' => $qty,
                     'price_at_purchase' => $price,
-                    'created_at' => $now,
-                    'updated_at' => $now,
+                    'created_at' => $orderTime,
+                    'updated_at' => $orderTime,
                 ];
             }
 
@@ -156,11 +169,98 @@ class DatabaseSeeder extends Seeder
                 'total_amount' => $totalAmount,
                 'payment_method' => $orderData['payment_method'],
                 'status' => $orderData['status'],
-                'created_at' => $now,
-                'updated_at' => $now,
+                'created_at' => $orderTime,
+                'updated_at' => $orderTime,
             ]);
 
             DB::table('order_items')->insert($orderItemsRows);
         }
+    }
+
+    /**
+     * Tự động vẽ ảnh bìa sách mẫu (.jpg) phối màu theo danh mục vào storage/app/public/products
+     */
+    private function generateBookCoverImage(string $relativePath, string $title, string $author, int $categoryId): void
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return;
+        }
+
+        $width = 400;
+        $height = 560;
+        $img = imagecreatetruecolor($width, $height);
+
+        // Bảng màu chủ đạo theo từng danh mục
+        $palettes = [
+            1 => [[30, 58, 95], [18, 36, 62], [217, 160, 91]],   // Văn học: Xanh navy & vàng đồng
+            2 => [[20, 83, 45], [12, 53, 29], [234, 179, 8]],    // Kinh tế: Xanh lục đậm & vàng kim
+            3 => [[154, 52, 18], [105, 34, 11], [251, 191, 36]], // Kỹ năng sống: Cam đất ấm
+            4 => [[30, 41, 59], [15, 23, 42], [56, 189, 248]],   // CNTT: Xám đá & xanh cyan
+            5 => [[13, 110, 110], [8, 74, 74], [249, 115, 22]],  // Thiếu nhi: Xanh ngọc & cam tươi
+        ];
+        [$bgRgb, $spineRgb, $accentRgb] = $palettes[$categoryId] ?? $palettes[1];
+
+        $bgColor = imagecolorallocate($img, $bgRgb[0], $bgRgb[1], $bgRgb[2]);
+        $spineColor = imagecolorallocate($img, $spineRgb[0], $spineRgb[1], $spineRgb[2]);
+        $accentColor = imagecolorallocate($img, $accentRgb[0], $accentRgb[1], $accentRgb[2]);
+        $creamCard = imagecolorallocate($img, 250, 248, 243);
+        $darkText = imagecolorallocate($img, 30, 41, 59);
+        $mutedText = imagecolorallocate($img, 100, 116, 139);
+        $white = imagecolorallocate($img, 255, 255, 255);
+
+        // Nền bìa & gáy sách bên trái
+        imagefilledrectangle($img, 0, 0, $width, $height, $bgColor);
+        imagefilledrectangle($img, 0, 0, 26, $height, $spineColor);
+        imagefilledrectangle($img, 26, 0, 30, $height, $accentColor);
+
+        // Khung trang trí trung tâm bìa sách
+        imagefilledrectangle($img, 58, 70, 368, 370, $creamCard);
+        imagefilledrectangle($img, 58, 70, 368, 82, $accentColor);
+
+        // Tìm font hỗ trợ tiếng Việt có dấu trên Windows/Linux
+        $fontPath = collect([
+            'C:\\Windows\\Fonts\\arialbd.ttf',
+            'C:\\Windows\\Fonts\\tahomabd.ttf',
+            'C:\\Windows\\Fonts\\arial.ttf',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+        ])->first(fn ($path) => file_exists($path));
+
+        if ($fontPath && function_exists('imagettftext')) {
+            // Ngắt dòng tên sách gọn trong khung
+            $words = explode(' ', $title);
+            $lines = [];
+            $current = '';
+            foreach ($words as $word) {
+                $test = $current === '' ? $word : $current . ' ' . $word;
+                if (mb_strlen($test, 'UTF-8') <= 17) {
+                    $current = $test;
+                } else {
+                    if ($current !== '') {
+                        $lines[] = $current;
+                    }
+                    $current = $word;
+                }
+            }
+            if ($current !== '') {
+                $lines[] = $current;
+            }
+
+            $y = 140;
+            foreach (array_slice($lines, 0, 5) as $line) {
+                imagettftext($img, 18, 0, 78, $y, $darkText, $fontPath, $line);
+                $y += 34;
+            }
+
+            // Đường kẻ phân cách & tên tác giả
+            imagefilledrectangle($img, 78, 305, 180, 309, $accentColor);
+            imagettftext($img, 12, 0, 78, 340, $mutedText, $fontPath, mb_strimwidth($author, 0, 28, '...', 'UTF-8'));
+            imagettftext($img, 11, 0, 78, 490, $white, $fontPath, 'BOOKSTORE DEMO');
+        } else {
+            imagestring($img, 5, 75, 150, Str::limit(Str::ascii($title), 26), $darkText);
+            imagestring($img, 3, 75, 325, Str::limit(Str::ascii($author), 30), $mutedText);
+        }
+
+        imagejpeg($img, Storage::disk('public')->path($relativePath), 90);
+        unset($img);
     }
 }
