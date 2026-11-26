@@ -99,3 +99,29 @@
 ## 3. Cách áp dụng vào dự án
 - Tạo view `resources/views/products/index.blade.php` tái sử dụng component `partials/product-card.blade.php`.
 - Thêm route `/products` trong `routes/web.php` trên nhánh `feature/TM-02-danh-sach` (commit `feat(TM-02): khung trang danh sach`) và đồng bộ lên nhánh `FrontEnd`.
+
+---
+
+# [AI Log] - Buổi 6
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Thay dữ liệu giả ở Trang chủ (TM-01) bằng dữ liệu thật từ CSDL (danh mục, 8 sách mới nhất, sách theo từng danh mục), đồng bộ giao diện và mở Pull Request cho TV4 review.
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Truy vấn dữ liệu thật Trang chủ TM-01):**
+> "Dựa vào 2 Model Category và Product đã có quan hệ hasMany/belongsTo, viết truy vấn Eloquent trong routes/web.php cho trang chủ lấy danh mục kèm số sách đang bán, 8 sách mới nhất và sách theo từng danh mục."
+
+**Prompt 2 (Cập nhật Blade View & Xử lý ảnh bìa):**
+> "Cập nhật product-card.blade.php và home.blade.php để đọc dữ liệu từ đối tượng Eloquent thay vì mảng tĩnh, đồng thời xử lý hiển thị khung giữ chỗ khi thư mục public chưa có file ảnh thật."
+
+**Prompt 3 (Xử lý xung đột Git & Đồng bộ giao diện):**
+> "Hỗ trợ xử lý xung đột gộp nhánh trong routes/web.php, AuthService.php và đồng bộ tên trường full_name giữa giao diện đăng ký auth/register.blade.php với Backend."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về truy vấn dữ liệu (TM-01):** AI gợi ý sử dụng `Category::withCount('products')`, `Product::where('is_active', true)->latest()->take(8)->get()` và `Category::with('products')` để lấy dữ liệu thật từ CSDL. Đã đối chiếu trực tiếp tên cột trong `app/Models/Product.php` (`name`, `author`, `price`, `image_url`, `is_active`) và kiểm thử thực tế trên trình duyệt tại `http://127.0.0.1:8000` hiển thị đúng 5 danh mục và 8 đầu sách mới nhất.
+- **Về giao diện & Xử lý ảnh:** AI hướng dẫn dùng hàm `data_get()` và `file_exists(public_path($image))` trong `product-card.blade.php` để tự động chuyển sang khung giữ chỗ wireframe khi thiếu file ảnh vật lý, giúp giao diện không bị lỗi vỡ hình.
+- **Về Git & Đồng bộ code:** Đã rà soát và xóa bỏ toàn bộ dấu đánh dấu xung đột (`<<<<<<<`, `=======`, `>>>>>>>`) trong `routes/web.php` và `AuthService.php`, sửa `name="full_name"` ở trang đăng ký và kiểm thử đăng ký tài khoản mới thành công.
+
+## 3. Cách áp dụng vào dự án
+- Hoàn thiện chức năng **TM-01** (Trang chủ lấy dữ liệu thật từ CSDL) trên `routes/web.php`, `resources/views/home.blade.php` và `resources/views/partials/product-card.blade.php`.
+- Đồng bộ lại giao diện đăng ký (`TM-04`) và danh sách sản phẩm (`TM-02`) giữa nhánh `FrontEnd` và `feature/TM-01-trang-chu`.
+- Đẩy mã nguồn kèm trailer `AI-assisted: Gemini [AI-06]` lên nhánh `feature/TM-01-trang-chu` và mở Pull Request chờ TV4 review.
