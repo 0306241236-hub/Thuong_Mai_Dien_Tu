@@ -173,3 +173,23 @@
 - Hoàn thành review PR **TM-12** cho TV4 và tham gia họp nhóm 20:00 chốt kịch bản demo Mốc 2.
 
 ---
+
+# [AI Log] - Buổi 9
+**Người thực hiện:** TV3 - Nguyễn Quốc Hội (Frontend Lead)
+**Nhiệm vụ:** Rà soát và tối ưu giao diện Responsive ở kích thước màn hình điện thoại 360px cho các trang khách hàng trên nhánh `feature/responsive`, chụp ảnh minh chứng trước/sau và chuẩn bị demo thử nội bộ Mốc 2.
+
+## 1. Prompt đã sử dụng
+**Prompt 1 (Tối ưu CSS Responsive cho màn hình điện thoại 360px):**
+> "Viết bổ sung quy tắc CSS @media (max-width: 400px) trong resources/views/layouts/app.blade.php cho website bán sách Bootstrap 5 để chống tràn ngang, thu gọn thẻ sách lưới 2 cột, tự động cuộn ngang cho các bảng dữ liệu và căn chỉnh thanh phân trang trên màn hình 360px."
+
+**Prompt 2 (Rà soát tuyến đường & Kiểm thử luồng giao diện khách hàng):**
+> "Hướng dẫn kiểm tra danh sách route hiện có trên nhánh develop (php artisan route:list) và rà soát hiển thị ở chế độ 360 × 800 trên Chrome DevTools cho các trang Trang chủ, Danh sách sách, Chi tiết sách, Đặt hàng và Đăng nhập/Đăng ký."
+
+## 2. Kết quả từ AI & Xác thực
+- **Về giao diện Responsive 360px:** AI gợi ý bổ sung quy tắc `overflow-x: hidden` cho `html, body`, tinh chỉnh padding container, thu gọn chiều cao ảnh bìa thẻ sách và áp dụng `overflow-x: auto` cho thẻ `table`. Đã kiểm thử thực tế trên Chrome DevTools ở kích thước `360 × 800` và chụp ảnh trước/sau trên các trang: Trang chủ (`/`), Danh sách (`/products`), Chi tiết sách (`/products/1`), Đặt hàng (`/checkout`), Đăng nhập (`/login`) và Đăng ký (`/register`).
+- **Về kiểm tra luồng tích hợp:** Đã kiểm tra bằng lệnh `php artisan route:list`, xác nhận các trang giao diện của TV3 và trang đặt hàng `/checkout` (TM-06) hiển thị ổn định trên màn hình nhỏ; riêng đường dẫn giỏ hàng `/cart` (TM-05) đang chờ TV5 merge vào `develop` nên đã bọc sẵn CSS dùng chung trong `layouts/app.blade.php` để tự động tương thích khi ghép luồng.
+
+## 3. Cách áp dụng vào dự án
+- Cập nhật bộ quy tắc CSS Responsive 360px dùng chung vào `resources/views/layouts/app.blade.php`.
+- Đính kèm ảnh chụp màn hình trước/sau khi chỉnh sửa và ghi chú tiến độ lên thẻ Trello `[FE] Responsive`.
+- Đồng bộ mã nguồn sang nhánh `FrontEnd`, đẩy nhánh `feature/responsive` kèm trailer `AI-assisted: Gemini [AI-09]` và mở Pull Request vào `develop` trước 21:00 để phục vụ buổi demo thử nội bộ Mốc 2.

@@ -51,7 +51,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-1 {{ request()->is('admin*') ? 'active fw-semibold text-dark border-bottom border-2 border-dark' : 'text-secondary' }}" href="{{ url('/admin/orders') }}">
+                        <a class="nav-link px-1 {{ request()->is('admin*') ? 'active fw-semibold text-dark border-bottom border-2 border-dark' : 'text-secondary' }}" href="{{ url('/admin') }}">
                             Quản trị
                         </a>
                     </li>

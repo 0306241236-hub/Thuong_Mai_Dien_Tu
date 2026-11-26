@@ -20,7 +20,7 @@
         <div class="row row-cols-2 row-cols-md-5 g-3">
             @forelse ($categories as $cat)
                 <div class="col">
-                    <a href="{{ url('/products?category=' . $cat->slug) }}" class="text-decoration-none text-dark">
+                    <a href="{{ url('/products?category_id=' . $cat->id) }}" class="text-decoration-none text-dark">
                         <div class="p-3 bg-light border rounded-2 h-100">
                             <div class="fw-semibold small mb-1">{{ $cat->name }}</div>
                             <div class="text-secondary" style="font-size: 0.8rem;">{{ $cat->products_count ?? 0 }} đầu sách</div>
@@ -61,7 +61,7 @@
             <section class="mb-5">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="fw-bold fs-5 m-0">{{ $cat->name }}</h2>
-                    <a href="{{ url('/products?category=' . $cat->slug) }}" class="text-dark small text-decoration-underline">Xem thêm &rarr;</a>
+                    <a href="{{ url('/products?category_id=' . $cat->slug) }}" class="text-dark small text-decoration-underline">Xem thêm &rarr;</a>
                 </div>
 
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
