@@ -27,6 +27,43 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Middleware\CheckAdmin;
 use Illuminate\Support\Facades\Auth;
+ FrontEnd
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+Route::get('/', function () {
+    $categories = [
+        ['name' => 'Công nghệ thông tin', 'slug' => 'cntt', 'count' => 24],
+        ['name' => 'Kinh tế', 'slug' => 'kinh-te', 'count' => 18],
+        ['name' => 'Toán học', 'slug' => 'toan-hoc', 'count' => 16],
+        ['name' => 'Ngoại ngữ', 'slug' => 'ngoai-ngu', 'count' => 20],
+        ['name' => 'Kỹ năng', 'slug' => 'ky-nang', 'count' => 12],
+    ];
+
+    $featuredBooks = [
+        ['id' => 1, 'title' => 'Lập trình C cơ bản', 'author' => 'Nguyễn Văn An', 'price' => 85000],
+        ['id' => 2, 'title' => 'Kinh tế vi mô', 'author' => 'Trần Minh Hà', 'price' => 120000],
+        ['id' => 3, 'title' => 'Toán cao cấp 1', 'author' => 'Lê Thị Mai', 'price' => 95000],
+        ['id' => 4, 'title' => 'Tiếng Anh học thuật', 'author' => 'Phạm Thu Trang', 'price' => 110000],
+    ];
+
+    $newBooks = [
+        ['id' => 5, 'title' => 'Cấu trúc dữ liệu và giải thuật', 'author' => 'Hoàng Đức Minh', 'price' => 135000],
+        ['id' => 6, 'title' => 'Kỹ năng học đại học', 'author' => 'Võ Thanh Tùng', 'price' => 65000],
+        ['id' => 7, 'title' => 'Xác suất thống kê', 'author' => 'Đặng Quốc Bảo', 'price' => 90000],
+        ['id' => 8, 'title' => 'Nguyên lý kế toán', 'author' => 'Bùi Thị Lan', 'price' => 105000],
+    ];
+
+    return view('home', compact('categories', 'featuredBooks', 'newBooks'));
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -99,6 +136,7 @@ develop
         </div>
     </body>
     </html>';
+ develop
 });
 
 backend
@@ -217,6 +255,10 @@ Route::get('/login', function () {
 })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
+ FrontEnd
+// Xử lý Đăng xuất
+Route::post('/logout', [AuthController::class, 'logout']);
+
 // 5. Đăng xuất (hỗ trợ cả nút bấm POST và gõ trực tiếp GET /logout)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', function (Request $request) {
@@ -231,6 +273,7 @@ Route::get('/logout', function (Request $request) {
 Route::redirect('/login/product', '/products');
 
 // 7. Trang Quản trị Admin (/admin) - Chặn Customer bằng CheckAdmin
+ develop
 
 // Thanh toán & đặt hàng (Customer)
 Route::middleware('auth')->group(function () {
@@ -250,6 +293,9 @@ Route::get('/test-db', function () {
 });
 
 // Trang tổng quan Quản trị (Admin)
+FrontEnd
+
+ develop
  develop
 Route::get('/admin', function () {
     return '
@@ -306,6 +352,12 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
+ FrontEnd
+    });
+Route::get('/layout-mau', function () {
+    return view('sample');
+});
+
  backend
     });
 
@@ -338,3 +390,4 @@ Route::get('/test-order/{userId}', function ($userId, OrderService $orderService
 
     });
  develop
+develop
