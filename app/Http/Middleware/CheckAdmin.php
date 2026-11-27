@@ -17,7 +17,7 @@ class CheckAdmin
 
         // 2. Đã đăng nhập nhưng role không phải 'admin' (tức là 'customer') -> chặn và đẩy về /products
         if (Auth::user()->role !== 'admin') {
-            return redirect('/products')->with('error', 'Bạn không có quyền truy cập trang quản trị Admin!');
+            return redirect('/')->with('error', 'Bạn không có quyền truy cập trang quản trị Admin!');
         }
 
         return $next($request);

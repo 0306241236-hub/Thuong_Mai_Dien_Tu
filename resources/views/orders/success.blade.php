@@ -18,9 +18,20 @@
 </head>
 <body>
     <div class="card">
+        @php
+            $trangThai = [
+                'pending'    => 'Chờ xác nhận',
+                'confirmed'  => 'Đã xác nhận',
+                'shipping'   => 'Đang giao hàng',
+                'delivered'  => 'Đã giao hàng',
+                'completed'  => 'Hoàn thành',
+                'cancelled'  => 'Đã hủy',
+            ];
+        @endphp
+
         <div class="success-badge">
             <h1>Đặt hàng thành công!</h1>
-            <div>Mã đơn hàng: <strong>#{{ $order->id }}</strong> &bull; Trạng thái: <strong>{{ $order->status }}</strong></div>
+            <div>Mã đơn hàng: <strong>#{{ $order->id }}</strong> &bull; Trạng thái: <strong>{{ $trangThai[$order->status] ?? $order->status }}</strong></div>
         </div>
 
         <ul class="info-list">

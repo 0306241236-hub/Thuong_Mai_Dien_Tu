@@ -8,15 +8,6 @@
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- Header tối giản chỉ có tên thương hiệu -->
-    <header class="bg-white border-bottom py-3">
-        <div class="container">
-            <a href="{{ url('/') }}" class="text-dark text-decoration-none fw-bold fs-5">
-                Sách Sinh Viên
-            </a>
-        </div>
-    </header>
-
     <!-- Form đăng nhập -->
     <main class="container my-auto py-5">
         <div class="row justify-content-center">
