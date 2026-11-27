@@ -23,8 +23,9 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
         <div class="container">
             <!-- Logo -->
-            <a class="navbar-brand fw-bold fs-4 text-dark m-0" href="{{ url('/trang-chu') }}">
-                Sách Sinh Viên
+            <a class="navbar-brand fw-bold fs-4 text-dark m-0 d-inline-flex align-items-center gap-2" href="{{ url('/') }}">
+                <img src="{{ asset('images/stack-of-books.png') }}" alt="Logo Sách Sinh Viên" width="32" height="32">
+                <span>Sách Sinh Viên</span>
             </a>
 
             <!-- Nút menu trên điện thoại (360px) -->
