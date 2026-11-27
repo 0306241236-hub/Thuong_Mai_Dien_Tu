@@ -1,3 +1,6 @@
+ 0306241236-hub-patch-1
+AI-01: Kiem thu git va PR
+
 # AI log – TV5 – Chung Đình Bá
 
 > Mỗi thành viên một tệp trong `ai-logs/`. Ghi một mục ngay sau mỗi lần dùng AI có ảnh hưởng đến sản phẩm, commit cùng thay đổi liên quan. Cả đồ án tối thiểu 6 mục có nội dung thực chất. Mã mục tăng dần: AI-01, AI-02, ...
@@ -39,3 +42,4 @@
 - Task / Commit / PR: [TEST] Bộ test case chức năng chính / [e4f5g6h] / [PR 8]
 - Mục đích: Liệt kê đầy đủ các trường hợp kiểm thử (luồng chính, ngoại lệ, kiểm tra dữ liệu đầu vào) cho chức năng chính trước khi nghiệm thu PR.
 - Prompt chính (nguyên văn hoặc link chia sẻ hội thoại): "Dựa trên mô tả chức năng sau: '[dán user story và tiêu chí chấp nhận]'. Hãy viết bảng test case gồm ID, kịch bản kiểm thử, điều kiện tiên quyết, các bước thực hiện, dữ liệu test và kết quả mong đợi (gồm trường hợp hợp lệ, bỏ trống và nhập sai định dạng)."
+ develop
